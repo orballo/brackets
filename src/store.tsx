@@ -27,7 +27,7 @@ const actions = {
 
       ethereum.on("accountsChanged", ([address]: string[]) => {
         setState("user", address || "");
-        setState("isConnected", false);
+        if (!address) setState("isConnected", false);
       });
     }
   },

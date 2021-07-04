@@ -1,4 +1,4 @@
-import { Component } from "solid-js";
+import { Show, Component } from "solid-js";
 import { css } from "@emotion/css";
 import { useStore } from "../store";
 import UserIcon from "./user-icon";
@@ -7,6 +7,7 @@ const Header: Component = () => {
   const { state } = useStore();
 
   const headerStyles = css`
+    position: absolute;
     height: 52px;
     width: 100%;
     display: flex;
@@ -23,7 +24,9 @@ const Header: Component = () => {
   return (
     <header class={headerStyles}>
       <h1 class={titleStyles}>Brackets</h1>
-      <UserIcon userAddress={state.user} />
+      <Show when={state.isConnected}>
+        <UserIcon userAddress={state.user} />
+      </Show>
     </header>
   );
 };
