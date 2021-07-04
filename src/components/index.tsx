@@ -1,16 +1,20 @@
-import type { Component } from "solid-js";
+import { Component, onMount } from "solid-js";
 import { useStore } from "../store";
+import Header from "./header";
+import ButtonConnect from "./button-connect";
 
 const App: Component = () => {
-  const { state, actions } = useStore();
+  const { actions } = useStore();
+
+  onMount(() => {
+    actions.detectProvider();
+  });
 
   return (
     <>
-      <header></header>
+      <Header />
       <main>
-        <h1>Brackets</h1>
-        <div>Counter:{state.count}</div>
-        <button onClick={() => actions.increment()}>+</button>
+        <ButtonConnect />
       </main>
     </>
   );

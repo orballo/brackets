@@ -1,21 +1,30 @@
-import { css } from "@emotion/css";
 import type { Component } from "solid-js";
+import { createEffect, Show } from "solid-js";
+import jazzicon from "jazzicon";
+import { css } from "@emotion/css";
+import { useStore } from "../store";
 
 const UserIcon: Component<{ userAddress: string }> = ({ userAddress = "" }) => {
-  const styles = css`
-    border-radius: 50%;
-    border: 2px solid #000;
+  let ref: any;
+
+  const { state } = useStore();
+
+  createEffect(() => {
+    console.log('ref:', ref)
+    if (ref && state.isConnected) {
+      const icon = jazzicon(32, parseInt(state.user.slice(2, 10), 16));
+      ref.appendChild(icon);
+    }
+  });
+
+  const containerStyles = css`
+    margin-left: auto;
   `;
 
   return (
-    <div title={userAddress}>
-      <svg
-        className={styles}
-        width="128"
-        height="128"
-        data-jdenticon-hash={userAddress.slice(2)}
-      />
-    </div>
+    <Show when={state.isConnected}>
+      <div title={userAddress} class={containerStyles} ref={ref} />
+    </Show>
   );
 };
 
