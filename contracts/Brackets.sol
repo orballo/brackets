@@ -6,7 +6,7 @@ import "hardhat/console.sol";
 
 contract Brackets is Ownable {
     struct Tournament {
-        uint256 id;
+        uint32 id;
         string name;
     }
 
@@ -20,10 +20,10 @@ contract Brackets is Ownable {
         string username;
     }
 
-    uint256 tournamentId;
+    uint32 tournamentId;
 
-    mapping(uint256 => Tournament) tournaments;
-    mapping(address => uint256[]) tournamentsByAdmin;
+    mapping(uint32 => Tournament) tournaments;
+    mapping(address => uint32[]) tournamentsByAdmin;
     mapping(address => string) addressToUsername;
 
     // mapping(address => uint256[]) tournamentsByParticipant;
@@ -61,8 +61,8 @@ contract Brackets is Ownable {
         );
 
         // Assign structs to array.
-        for (uint256 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
-            uint256 _tournamentId = tournamentsByAdmin[msg.sender][i];
+        for (uint32 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
+            uint32 _tournamentId = tournamentsByAdmin[msg.sender][i];
             _tournaments[i] = tournaments[_tournamentId];
         }
 
