@@ -11,7 +11,10 @@ const UserIcon: Component<{ userAddress: string }> = ({ userAddress = "" }) => {
 
   createEffect(() => {
     const icon = jazzicon(32, parseInt(state.user.slice(2, 10), 16));
-    if (ref && state.isConnected) ref.appendChild(icon);
+    if (ref && state.isConnected) {
+      ref.innerHTML = "";
+      ref.appendChild(icon);
+    }
   });
 
   const containerStyles = css`

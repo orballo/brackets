@@ -7,54 +7,54 @@ import "hardhat/console.sol";
 contract Brackets is Ownable {
     struct Tournament {
         uint32 id;
-        string name;
+        uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
+        string registerMethod; // "direct" | "invitation"
     }
 
-    struct Participant {
-        string username;
-        address account;
-    }
-
-    struct CreateTournamentOptions {
-        string name;
-        string username;
+    struct TournamentOptions {
+        uint8 numberOfPlayers;
+        string registerMethod;
     }
 
     uint32 tournamentId;
 
     mapping(uint32 => Tournament) tournaments;
     mapping(address => uint32[]) tournamentsByAdmin;
-    mapping(address => string) addressToUsername;
-
-    // mapping(address => uint256[]) tournamentsByParticipant;
+    mapping(address => uint32[]) tournamentsByParticipant;
 
     constructor() {
         tournamentId = 0;
     }
 
-    function createTournament(CreateTournamentOptions memory _options)
-        public
-        returns (Tournament memory)
-    {
-        // Increase the tournament id.
-        tournamentId += 1;
-
+    /**
+     * Create a new tournament.
+     */
+    function createTournament() public {
         // Create the tournament.
         Tournament memory _tournament;
         _tournament.id = tournamentId;
-        _tournament.name = _options.name;
+
+        console.log("tournamentId:", _tournament.id);
 
         // Save the tournament and its relationships.
         tournaments[_tournament.id] = _tournament;
         tournamentsByAdmin[msg.sender].push(tournamentId);
 
-        // Save admin username.
-        addressToUsername[msg.sender] = _options.username;
-
-        return _tournament;
+        // Increase the tournament id.
+        tournamentId += 1;
     }
 
-    function getTournaments() public view returns (Tournament[] memory) {
+    /**
+     * Register a participant to a tournament.
+     */
+    function registerPaticipant(uint32 _tournamentId) public {
+        tournamentsByParticipant[msg.sender].push(_tournamentId);
+    }
+
+    /**
+     * Return all the tournaments where the user is the admin.
+     */
+    function getTournamentsByAdmin() public view returns (Tournament[] memory) {
         // Initialize empty array.
         Tournament[] memory _tournaments = new Tournament[](
             tournamentsByAdmin[msg.sender].length
@@ -64,6 +64,53 @@ contract Brackets is Ownable {
         for (uint32 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
             uint32 _tournamentId = tournamentsByAdmin[msg.sender][i];
             _tournaments[i] = tournaments[_tournamentId];
+        }
+
+        return _tournaments;
+    }
+
+    /**
+     * Return all the tournaments where the account is a participant.
+     */
+    function getTournamentsByParticipant()
+        public
+        view
+        returns (Tournament[] memory)
+    {
+        // Initialize empty array.
+        Tournament[] memory _tournaments = new Tournament[](
+            tournamentsByParticipant[msg.sender].length
+        );
+
+        // Assign structs to array.
+        for (
+            uint32 i = 0;
+            i < tournamentsByParticipant[msg.sender].length;
+            i++
+        ) {
+            uint32 _tournamentId = tournamentsByParticipant[msg.sender][i];
+            _tournaments[i] = tournaments[_tournamentId];
+        }
+
+        return _tournaments;
+    }
+
+    /**
+     * Return all the tournaments stored in the contract.
+     */
+
+    function getTournaments()
+        public
+        view
+        onlyOwner
+        returns (Tournament[] memory)
+    {
+        // Initialize empty array.
+        Tournament[] memory _tournaments = new Tournament[](tournamentId);
+
+        // Assign structs to array.
+        for (uint32 i = 0; i < tournamentId; i++) {
+            _tournaments[i] = tournaments[i];
         }
 
         return _tournaments;

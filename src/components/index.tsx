@@ -3,6 +3,8 @@ import { css, injectGlobal } from "@emotion/css";
 import { useStore } from "../store";
 import Header from "./header";
 import ButtonConnect from "./button-connect";
+import CreateTournament from "./create-tournament";
+import TournamentList from "./tournament-list";
 
 injectGlobal`
   body {
@@ -37,12 +39,17 @@ const App: Component = () => {
     justify-content: center;
     align-items: center;
     height: 100%;
+    flex-direction: column;
   `;
 
   return (
     <>
       <Header />
       <main class={mainStyles}>
+        <Show when={state.isConnected}>
+          <CreateTournament />
+          <TournamentList />
+        </Show>
         <Show when={!state.isConnected}>
           <ButtonConnect />
         </Show>

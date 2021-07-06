@@ -5,7 +5,8 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "deploy": "hardhat --network localhost run scripts/deploy.js"
   },
   "license": "MIT",
   "devDependencies": {
