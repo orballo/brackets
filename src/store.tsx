@@ -2,7 +2,7 @@ import { createStore } from "solid-js/store";
 import { createContext, onMount, useContext } from "solid-js";
 import { ethers } from "ethers";
 import detectProvider from "@metamask/detect-provider";
-import { State } from "./types";
+import { State, Tournament } from "./types";
 
 import Brackets from "../artifacts/contracts/Brackets.sol/Brackets.json";
 
@@ -13,7 +13,8 @@ const initialState: State = {
   provider: null,
   contractAddress: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
   createTournament: {
-    name: "",
+    numberOfPlayers: 2,
+    registerMethod: "direct",
     isSubmitting: false,
   },
   tournamentList: [],
@@ -72,8 +73,11 @@ const actions = {
     );
     const response = await contract.getTournamentsByAdmin();
 
-    const tournaments = response.map((item: any) => ({
+    const tournaments = response.map((item: Tournament) => ({
       id: item.id,
+      numberOfPlayers: item.numberOfPlayers,
+      registerMethod: item.registerMethod,
+      status: item.status,
     }));
 
     setState("tournamentList", tournaments);
@@ -88,7 +92,10 @@ const actions = {
       signer
     );
     try {
-      const transaction = await contract.createTournament();
+      const transaction = await contract.createTournament({
+        numberOfPlayers: state.createTournament.numberOfPlayers,
+        registerMethod: state.createTournament.registerMethod,
+      });
       await state.provider.waitForTransaction(transaction.hash);
 
       actions.getTournaments();
@@ -97,6 +104,11 @@ const actions = {
     }
 
     setState("createTournament", "isSubmitting", false);
+  },
+  updateCreateTournamentField: (name: any, value: any) => {
+    if (name === "numberOfPlayers") value = parseInt(value);
+
+    setState("createTournament", name, value);
   },
 };
 

@@ -54,7 +54,16 @@ const CreateTournament: Component = () => {
     <form onSubmit={handleSubmit} class={formStyles}>
       <label class={labelStyles}>
         <span class={spanStyles}>Number of players:</span>
-        <select class={selectStyles}>
+        <select
+          name="numberOfPlayers"
+          class={selectStyles}
+          onChange={(event: any) =>
+            actions.updateCreateTournamentField(
+              event.target.name,
+              event.target.value
+            )
+          }
+        >
           <option value="2" label="2" />
           <option value="4" label="4" />
           <option value="8" label="8" />
@@ -64,7 +73,16 @@ const CreateTournament: Component = () => {
       </label>
       <label class={labelStyles}>
         <span class={spanStyles}>Registration method:</span>
-        <select class={selectStyles}>
+        <select
+          name="registerMethod"
+          class={selectStyles}
+          onChange={(event: any) =>
+            actions.updateCreateTournamentField(
+              event.target.name,
+              event.target.value
+            )
+          }
+        >
           <option value="direct" label="Direct" />
           <option value="invitation" label="Invitation" />
         </select>

@@ -17,6 +17,8 @@ const TournamentList: Component = () => {
     width: 50%;
     display: flex;
     justify-content: center;
+    align-items: center;
+    flex-direction: column;
   `;
 
   return (

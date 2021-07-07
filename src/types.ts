@@ -5,7 +5,8 @@ export interface State {
   provider: any;
   contractAddress: string;
   createTournament: {
-    name: string;
+    numberOfPlayers: number;
+    registerMethod: string;
     isSubmitting: boolean;
   };
   tournamentList: Tournament[];

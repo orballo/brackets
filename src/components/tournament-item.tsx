@@ -17,14 +17,23 @@ const TournamentItem: Component<Tournament> = ({
     padding: 12px;
     display: flex;
     justify-content: space-between;
+    width: 100%;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  `;
+
+  const divStyles = css`
+    padding: 4px 8px;
   `;
 
   return (
     <li class={liStyles}>
-      <div>ID: {id}</div>
-      <div># of players: {numberOfPlayers}</div>
-      <div>Registration method: {registerMethod}</div>
-      <div>Status: {status}</div>
+      <div class={divStyles}>ID: {id}</div>
+      <div class={divStyles}>Number of players: {numberOfPlayers}</div>
+      <div class={divStyles}>Registration method: {registerMethod}</div>
+      <div class={divStyles}>Status: {status}</div>
     </li>
   );
 };
