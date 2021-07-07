@@ -1,10 +1,8 @@
-import { Show, Component, onMount } from "solid-js";
-import { css, injectGlobal } from "@emotion/css";
+import { Component, onMount } from "solid-js";
+import { injectGlobal } from "@emotion/css";
 import { useStore } from "../store";
 import Header from "./header";
-import ButtonConnect from "./button-connect";
-import CreateTournament from "./create-tournament";
-import TournamentList from "./tournament-list";
+import Main from "./main";
 
 injectGlobal`
   body {
@@ -34,26 +32,10 @@ const App: Component = () => {
     actions.detectProvider();
   });
 
-  const mainStyles = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    flex-direction: column;
-  `;
-
   return (
     <>
       <Header />
-      <main class={mainStyles}>
-        <Show when={state.isConnected}>
-          <CreateTournament />
-          <TournamentList />
-        </Show>
-        <Show when={!state.isConnected}>
-          <ButtonConnect />
-        </Show>
-      </main>
+      <Main />
     </>
   );
 };
