@@ -9,6 +9,7 @@ contract Brackets is Ownable {
         uint32 id;
         uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
         string registerMethod; // "direct" | "invitation"
+        string status; // "created" | "started" | "finished" | "canceled"
     }
 
     struct TournamentOptions {
@@ -29,12 +30,32 @@ contract Brackets is Ownable {
     /**
      * Create a new tournament.
      */
-    function createTournament() public {
-        // Create the tournament.
+    function createTournament(TournamentOptions memory _options) public {
+        // Validate `numberOfPlayers` option.
+        require(
+            _options.numberOfPlayers == 2 ||
+                _options.numberOfPlayers == 4 ||
+                _options.numberOfPlayers == 8 ||
+                _options.numberOfPlayers == 16 ||
+                _options.numberOfPlayers == 32,
+            "Invalid value for `numberOfPlayers`."
+        );
+
+        // Validate `registerMethod` option.
+        require(
+            keccak256(bytes(_options.registerMethod)) ==
+                keccak256(bytes("direct")) ||
+                keccak256(bytes(_options.registerMethod)) ==
+                keccak256(bytes("invitation")),
+            "Invalid value for `registerMethod`."
+        );
+
+        // Populate the tournament.
         Tournament memory _tournament;
         _tournament.id = tournamentId;
-
-        console.log("tournamentId:", _tournament.id);
+        _tournament.numberOfPlayers = _options.numberOfPlayers;
+        _tournament.registerMethod = _options.registerMethod;
+        _tournament.status = "created";
 
         // Save the tournament and its relationships.
         tournaments[_tournament.id] = _tournament;

@@ -5,10 +5,6 @@ import { useStore } from "../store";
 const CreateTournament: Component = () => {
   const { state, actions } = useStore();
 
-  const handleChange = (event: any) => {
-    actions.updateTournamentName(event.target.value);
-  };
-
   const handleSubmit = (event: any) => {
     event.preventDefault();
     actions.createTournament();

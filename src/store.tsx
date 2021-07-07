@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { createContext, onMount, useContext } from "solid-js";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import detectProvider from "@metamask/detect-provider";
 
 import Brackets from "../artifacts/contracts/Brackets.sol/Brackets.json";
@@ -23,7 +23,7 @@ const initialState: State = {
   user: "",
   ethereum: null,
   provider: null,
-  contractAddress: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+  contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   createTournament: {
     name: "",
     isSubmitting: false,
@@ -82,13 +82,11 @@ const actions = {
       Brackets.abi,
       state.provider
     );
-    const response = await contract.getTournaments();
+    const response = await contract.getTournamentsByAdmin();
 
     const tournaments = response.map((item: any) => ({
       id: item.id,
     }));
-
-    console.log("tournaments:", response);
 
     setState("tournamentList", tournaments);
   },
@@ -101,15 +99,16 @@ const actions = {
       Brackets.abi,
       signer
     );
-    await contract.createTournament({
-      name: state.createTournament.name,
-      username: "Admin",
-    });
+    try {
+      const transaction = await contract.createTournament();
+      await state.provider.waitForTransaction(transaction.hash);
 
-    // setState("createTournament", "isSubmitting", false);
-  },
-  updateTournamentName: (name: string) => {
-    setState("createTournament", "name", name);
+      actions.getTournaments();
+    } catch (error) {
+      console.error(error);
+    }
+
+    setState("createTournament", "isSubmitting", false);
   },
 };
 

@@ -1,5 +1,5 @@
-require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-waffle");
 require("hardhat-watcher");
 
 /**
