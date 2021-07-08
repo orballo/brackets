@@ -11,9 +11,10 @@ const Main: Component = () => {
   const mainStyles = css`
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     height: 100%;
     flex-direction: row;
+    padding-top: 120px;
   `;
 
   return (

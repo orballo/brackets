@@ -41,6 +41,7 @@ const TournamentItem: Component<Tournament> = ({
     height: 32px;
     margin-top: 12px;
     cursor: pointer;
+    margin-left: auto;
   `;
 
   return (

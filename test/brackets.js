@@ -141,6 +141,24 @@ describe("Brackets", async () => {
     });
   });
 
+  describe("registerParticipant", () => {
+    it("Should register a participant to the tournament.", async () => {
+      let tournaments = await brackets.getTournamentsByParticipant();
+
+      expect(tournaments).to.eql([]);
+
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.registerParticipant(0);
+
+      tournaments = await brackets.getTournamentsByParticipant();
+
+      expect(tournaments.length).to.equal(1);
+    });
+  });
+
   describe("getTournaments", () => {
     it("Should get all the tournaments stored in the contract in descendent order.", async () => {
       const [owner, addressOne, addressTwo] = await ethers.getSigners();

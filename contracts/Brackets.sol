@@ -17,6 +17,15 @@ contract Brackets is Ownable {
         string registerMethod;
     }
 
+    // struct TournamentPayload {
+    //     uint32 id;
+    //     uint8 numberOfPlayers;
+    //     string registerMethod;
+    //     string status;
+    //     address admin;
+    //     address[] participants;
+    // }
+
     uint32 tournamentId;
 
     mapping(uint32 => Tournament) tournaments;
@@ -68,7 +77,7 @@ contract Brackets is Ownable {
     /**
      * Register a participant to a tournament.
      */
-    function registerPaticipant(uint32 _tournamentId) public {
+    function registerParticipant(uint32 _tournamentId) public {
         tournamentsByParticipant[msg.sender].push(_tournamentId);
     }
 
@@ -123,7 +132,6 @@ contract Brackets is Ownable {
     /**
      * Return all the tournaments stored in the contract.
      */
-
     function getTournaments()
         public
         view

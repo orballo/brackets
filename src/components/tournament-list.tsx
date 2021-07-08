@@ -13,7 +13,8 @@ const TournamentList: Component = () => {
   const ulStyles = css`
     list-style: none;
     margin: 0;
-    padding: 12px;
+    padding: 0;
+    margin-left: 12px;
     width: 50%;
     display: flex;
     justify-content: center;
