@@ -83,7 +83,9 @@ contract Brackets is Ownable {
 
         // Assign structs to array.
         for (uint32 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
-            uint32 _tournamentId = tournamentsByAdmin[msg.sender][i];
+            uint32 _tournamentId = tournamentsByAdmin[msg.sender][
+                tournamentsByAdmin[msg.sender].length - i - 1
+            ];
             _tournaments[i] = tournaments[_tournamentId];
         }
 
@@ -109,7 +111,9 @@ contract Brackets is Ownable {
             i < tournamentsByParticipant[msg.sender].length;
             i++
         ) {
-            uint32 _tournamentId = tournamentsByParticipant[msg.sender][i];
+            uint32 _tournamentId = tournamentsByParticipant[msg.sender][
+                tournamentsByParticipant[msg.sender].length - i - 1
+            ];
             _tournaments[i] = tournaments[_tournamentId];
         }
 

@@ -184,4 +184,53 @@ describe("Brackets", async () => {
       }
     });
   });
+
+  describe("getTournamentsByAdmin", () => {
+    it("Should return all the tournaments where the user is the admin in descending order", async () => {
+      const [, addressOne, addressTwo] = await ethers.getSigners();
+
+      let tournaments = await brackets.getTournamentsByAdmin();
+
+      expect(tournaments).to.eql([]);
+
+      brackets.connect(addressOne).createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.connect(addressTwo).createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.connect(addressOne).createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.connect(addressTwo).createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+
+      tournaments = await brackets.connect(addressOne).getTournamentsByAdmin();
+
+      expect(tournaments.length).to.equal(2);
+      expect(tournaments[0].id).to.equal(2);
+      expect(tournaments[1].id).to.equal(0);
+
+      tournaments = await brackets.connect(addressTwo).getTournamentsByAdmin();
+
+      expect(tournaments.length).to.equal(2);
+      expect(tournaments[0].id).to.equal(3);
+      expect(tournaments[1].id).to.equal(1);
+    });
+  });
+
+  describe("getTournamentsByParticipant", () => {
+    it(
+      "Should return all the tournaments where the user is a participant in descending order"
+    );
+  });
+
+  describe("getTournamentById", () => {
+    it("Should return a tournament by id");
+  });
 });

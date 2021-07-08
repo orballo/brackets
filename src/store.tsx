@@ -8,10 +8,11 @@ import Brackets from "../artifacts/contracts/Brackets.sol/Brackets.json";
 
 const initialState: State = {
   isConnected: false,
+  isSynced: false,
   user: "",
   ethereum: null,
   provider: null,
-  contractAddress: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+  contractAddress: "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
   createTournament: {
     numberOfPlayers: 2,
     registerMethod: "direct",
@@ -51,6 +52,8 @@ const actions = {
           setState("isConnected", false);
         }
       });
+
+      setState("isSynced", true);
     }
   },
   connect: async () => {
@@ -71,7 +74,7 @@ const actions = {
       Brackets.abi,
       state.provider
     );
-    const response = await contract.getTournamentsByAdmin();
+    const response = await contract.getTournaments();
 
     const tournaments = response.map((item: Tournament) => ({
       id: item.id,

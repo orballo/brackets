@@ -22,7 +22,7 @@ const Main: Component = () => {
         <CreateTournament />
         <TournamentList />
       </Show>
-      <Show when={!state.isConnected}>
+      <Show when={!state.isConnected && state.isSynced}>
         <ButtonConnect />
       </Show>
     </main>

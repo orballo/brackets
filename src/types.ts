@@ -1,5 +1,6 @@
 export interface State {
   isConnected: boolean;
+  isSynced: boolean;
   user: string;
   ethereum: any;
   provider: any;

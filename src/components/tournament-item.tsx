@@ -40,6 +40,7 @@ const TournamentItem: Component<Tournament> = ({
   const buttonStyles = css`
     height: 32px;
     margin-top: 12px;
+    cursor: pointer;
   `;
 
   return (
