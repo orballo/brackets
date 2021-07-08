@@ -131,7 +131,7 @@ contract Brackets is Ownable {
 
         // Assign structs to array.
         for (uint32 i = 0; i < tournamentId; i++) {
-            _tournaments[i] = tournaments[i];
+            _tournaments[i] = tournaments[tournamentId - i - 1];
         }
 
         return _tournaments;

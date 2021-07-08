@@ -48,6 +48,10 @@ const CreateTournament: Component = () => {
     margin-left: auto;
     padding: 12px 16px;
     margin-top: 12px;
+
+    &:hover {
+      box-shadow: 0 0 2px 1px #999;
+    }
   `;
 
   return (

@@ -38,9 +38,9 @@ describe("Brackets", async () => {
       tournaments = await brackets.getTournaments();
 
       expect(tournaments.length).to.equal(3);
-      expect(tournaments[0].id).to.equal(0);
+      expect(tournaments[0].id).to.equal(2);
       expect(tournaments[1].id).to.equal(1);
-      expect(tournaments[2].id).to.equal(2);
+      expect(tournaments[2].id).to.equal(0);
     });
 
     it("Should create tournaments with all the possible options for `numberOfPlayers`.", async () => {
@@ -72,14 +72,25 @@ describe("Brackets", async () => {
       tournaments = await brackets.getTournaments();
 
       expect(tournaments.length).to.equal(5);
-      expect(tournaments[0].numberOfPlayers).to.equal(2);
-      expect(tournaments[1].numberOfPlayers).to.equal(4);
+      expect(tournaments[0].numberOfPlayers).to.equal(32);
+      expect(tournaments[1].numberOfPlayers).to.equal(16);
       expect(tournaments[2].numberOfPlayers).to.equal(8);
-      expect(tournaments[3].numberOfPlayers).to.equal(16);
-      expect(tournaments[4].numberOfPlayers).to.equal(32);
+      expect(tournaments[3].numberOfPlayers).to.equal(4);
+      expect(tournaments[4].numberOfPlayers).to.equal(2);
     });
 
-    it.skip("Should fail if the `numberOfPlayers` is not a valid value.", async () => {});
+    it("Should fail if the `numberOfPlayers` is not a valid value.", async () => {
+      try {
+        await brackets.createTournament({
+          numberOfPlayers: 3,
+          registerMethod: "direct",
+        });
+      } catch (error) {
+        expect(error.message).to.include(
+          "Invalid value for `numberOfPlayers`."
+        );
+      }
+    });
 
     it("Should create tournaments with all the possible options for `registerMethod`.", async () => {
       let tournaments = await brackets.getTournaments();
@@ -98,11 +109,20 @@ describe("Brackets", async () => {
       tournaments = await brackets.getTournaments();
 
       expect(tournaments.length).to.equal(2);
-      expect(tournaments[0].registerMethod).to.equal("direct");
-      expect(tournaments[1].registerMethod).to.equal("invitation");
+      expect(tournaments[0].registerMethod).to.equal("invitation");
+      expect(tournaments[1].registerMethod).to.equal("direct");
     });
 
-    it.skip("Should fail if the `registerMethod` is not a valid value.", async () => {});
+    it("Should fail if the `registerMethod` is not a valid value.", async () => {
+      try {
+        await brackets.createTournament({
+          numberOfPlayers: 4,
+          registerMethod: "random",
+        });
+      } catch (error) {
+        expect(error.message).to.include("Invalid value for `registerMethod`.");
+      }
+    });
 
     it("Should create tournaments with status `created`.", async () => {
       let tournaments = await brackets.getTournaments();
@@ -122,7 +142,7 @@ describe("Brackets", async () => {
   });
 
   describe("getTournaments", () => {
-    it("Should get all the tournaments stored in the contract.", async () => {
+    it("Should get all the tournaments stored in the contract in descendent order.", async () => {
       const [owner, addressOne, addressTwo] = await ethers.getSigners();
 
       let tournaments = await brackets.getTournaments();
@@ -137,10 +157,17 @@ describe("Brackets", async () => {
         numberOfPlayers: 2,
         registerMethod: "direct",
       });
+      brackets.connect(addressTwo).createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
 
       tournaments = await brackets.connect(owner).getTournaments();
 
-      expect(tournaments.length).to.equal(2);
+      expect(tournaments.length).to.equal(3);
+      expect(tournaments[0].id).to.equal(2);
+      expect(tournaments[1].id).to.equal(1);
+      expect(tournaments[2].id).to.equal(0);
     });
 
     it("Should fail if the account is not the owner.", async () => {
