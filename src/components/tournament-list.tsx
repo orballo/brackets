@@ -7,7 +7,8 @@ const TournamentList: Component = () => {
   const { state, actions } = useStore();
 
   onMount(() => {
-    actions.getTournaments();
+    actions.getAdminTournaments();
+    actions.getParticipantTournaments();
   });
 
   const ulStyles = css`
@@ -25,7 +26,7 @@ const TournamentList: Component = () => {
   return (
     <ul class={ulStyles}>
       <For
-        each={state.tournamentList}
+        each={state.tournaments.all}
         fallback={<div>Use the form to create your first tournament.</div>}
       >
         {(tournament) => <Tournament {...tournament} />}

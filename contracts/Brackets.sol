@@ -82,6 +82,35 @@ contract Brackets is Ownable {
     }
 
     /**
+     * Unregister a participant from a tournament.
+     */
+    function unregisterParticipant(uint32 _tournamentId) public {
+        bool removed = false;
+
+        for (
+            uint32 i = 0;
+            i < tournamentsByParticipant[msg.sender].length;
+            i++
+        ) {
+            if (
+                removed ||
+                tournamentsByParticipant[msg.sender][i] == _tournamentId
+            ) {
+                if (i != tournamentsByParticipant[msg.sender].length - 1) {
+                    tournamentsByParticipant[msg.sender][
+                        i
+                    ] = tournamentsByParticipant[msg.sender][i + 1];
+                }
+                removed = true;
+            }
+        }
+
+        require(removed, "The user is not registered in that tournament.");
+
+        tournamentsByParticipant[msg.sender].pop();
+    }
+
+    /**
      * Return all the tournaments where the user is the admin.
      */
     function getTournamentsByAdmin() public view returns (Tournament[] memory) {

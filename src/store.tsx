@@ -2,7 +2,7 @@ import { createStore } from "solid-js/store";
 import { createContext, onMount, useContext } from "solid-js";
 import { ethers } from "ethers";
 import detectProvider from "@metamask/detect-provider";
-import { State, Tournament } from "./types";
+import { State, TournamentPayload } from "./types";
 
 import Brackets from "../artifacts/contracts/Brackets.sol/Brackets.json";
 
@@ -12,13 +12,33 @@ const initialState: State = {
   user: "",
   ethereum: null,
   provider: null,
-  contractAddress: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+  contractAddress: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
   createTournament: {
     numberOfPlayers: 2,
     registerMethod: "direct",
     isSubmitting: false,
   },
-  tournamentList: [],
+  tournaments: {
+    get all() {
+      const { admin, participant } = this as State["tournaments"];
+
+      const all = admin.concat(participant).reduce((final, current) => {
+        const index = final.findIndex((t) => t.id === current.id);
+
+        if (index >= 0) {
+          Object.assign(final[index], current);
+        } else {
+          final.push({ ...current });
+        }
+
+        return final;
+      }, []);
+
+      return all;
+    },
+    admin: [],
+    participant: [],
+  },
 };
 
 const [state, setState] = createStore(initialState);
@@ -68,22 +88,43 @@ const actions = {
       setState("isConnected", true);
     }
   },
-  getTournaments: async () => {
+  getAdminTournaments: async () => {
     const contract = new ethers.Contract(
       state.contractAddress,
       Brackets.abi,
       state.provider
     );
-    const response = await contract.getTournaments();
 
-    const tournaments = response.map((item: Tournament) => ({
+    const response = await contract.getTournamentsByAdmin();
+
+    const tournaments = response.map((item: TournamentPayload) => ({
       id: item.id,
       numberOfPlayers: item.numberOfPlayers,
       registerMethod: item.registerMethod,
       status: item.status,
+      admin: true,
     }));
 
-    setState("tournamentList", tournaments);
+    setState("tournaments", "admin", tournaments);
+  },
+  getParticipantTournaments: async () => {
+    const contract = new ethers.Contract(
+      state.contractAddress,
+      Brackets.abi,
+      state.provider
+    );
+
+    const response = await contract.getTournamentsByParticipant();
+
+    const tournaments = response.map((item: TournamentPayload) => ({
+      id: item.id,
+      numberOfPlayers: item.numberOfPlayers,
+      registerMethod: item.registerMethod,
+      status: item.status,
+      participant: true,
+    }));
+
+    setState("tournaments", "participant", tournaments);
   },
   createTournament: async () => {
     setState("createTournament", "isSubmitting", true);
@@ -101,12 +142,31 @@ const actions = {
       });
       await state.provider.waitForTransaction(transaction.hash);
 
-      actions.getTournaments();
+      actions.getAdminTournaments();
+      actions.getParticipantTournaments();
     } catch (error) {
       console.error(error);
     }
 
     setState("createTournament", "isSubmitting", false);
+  },
+  registerParticipant: async (id: number) => {
+    const signer = state.provider.getSigner();
+    const contract = new ethers.Contract(
+      state.contractAddress,
+      Brackets.abi,
+      signer
+    );
+
+    try {
+      const transaction = await contract.registerParticipant(id);
+      await state.provider.waitForTransaction(transaction.hash);
+
+      actions.getAdminTournaments();
+      actions.getParticipantTournaments();
+    } catch (error) {
+      console.error(error);
+    }
   },
   updateCreateTournamentField: (name: any, value: any) => {
     if (name === "numberOfPlayers") value = parseInt(value);

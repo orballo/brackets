@@ -142,7 +142,7 @@ describe("Brackets", async () => {
   });
 
   describe("registerParticipant", () => {
-    it("Should register a participant to the tournament.", async () => {
+    it("Should register the user for the tournament.", async () => {
       let tournaments = await brackets.getTournamentsByParticipant();
 
       expect(tournaments).to.eql([]);
@@ -157,6 +157,46 @@ describe("Brackets", async () => {
 
       expect(tournaments.length).to.equal(1);
     });
+
+    it("Should fail if the tournament is already started.");
+  });
+
+  describe("unregisterParticipant", () => {
+    it("Should unregister the user from the tournament.", async () => {
+      let tournaments = await brackets.getTournamentsByParticipant();
+
+      expect(tournaments.length).to.equal(0);
+
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.registerParticipant(0);
+      brackets.registerParticipant(1);
+      brackets.registerParticipant(2);
+
+      tournaments = await brackets.getTournamentsByParticipant();
+
+      expect(tournaments.length).to.equal(3);
+
+      brackets.unregisterParticipant(2);
+      brackets.unregisterParticipant(1);
+      brackets.unregisterParticipant(0);
+
+      tournaments = await brackets.getTournamentsByParticipant();
+
+      expect(tournaments.length).to.equal(0);
+    });
+
+    it("Should fail if the user is not registered for the tournament.");
   });
 
   describe("getTournaments", () => {

@@ -10,12 +10,21 @@ export interface State {
     registerMethod: string;
     isSubmitting: boolean;
   };
-  tournamentList: Tournament[];
+  tournaments: {
+    all: Tournament[];
+    admin: TournamentPayload[];
+    participant: TournamentPayload[];
+  };
 }
 
-export interface Tournament {
+export interface TournamentPayload {
   id: number;
   numberOfPlayers: number;
   registerMethod: string;
   status: string;
+}
+
+export interface Tournament extends TournamentPayload {
+  admin?: boolean;
+  participant?: boolean;
 }

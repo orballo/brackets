@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import type { Component } from "solid-js";
+import { useStore } from "../store";
 import { Tournament } from "../types";
 
 const TournamentItem: Component<Tournament> = ({
@@ -7,7 +8,11 @@ const TournamentItem: Component<Tournament> = ({
   numberOfPlayers,
   registerMethod,
   status,
+  admin = false,
+  participant = false,
 }) => {
+  const { actions } = useStore();
+
   const liStyles = css`
     background-color: #fff;
     color: #333;
@@ -16,7 +21,6 @@ const TournamentItem: Component<Tournament> = ({
     display: flex;
     padding: 12px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     width: 100%;
@@ -27,7 +31,7 @@ const TournamentItem: Component<Tournament> = ({
   `;
 
   const divStyles = css`
-    padding: 4px 8px;
+    padding: 4px 12px;
     text-align: left;
 
     &:nth-of-type(2),
@@ -50,7 +54,16 @@ const TournamentItem: Component<Tournament> = ({
       <div class={divStyles}>Number of players: {numberOfPlayers}</div>
       <div class={divStyles}>Registration: {registerMethod}</div>
       <div class={divStyles}>Status: {status}</div>
-      <button class={buttonStyles}>Register as participant</button>
+      {admin && <div class={divStyles}>Admin</div>}
+      {participant && <div class={divStyles}>Participant</div>}
+      {!participant && (
+        <button
+          onClick={() => actions.registerParticipant(id)}
+          class={buttonStyles}
+        >
+          Register as participant
+        </button>
+      )}
     </li>
   );
 };
