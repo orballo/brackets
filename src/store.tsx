@@ -12,7 +12,7 @@ const initialState: State = {
   user: "",
   ethereum: null,
   provider: null,
-  contractAddress: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+  contractAddress: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
   createTournament: {
     numberOfPlayers: 2,
     registerMethod: "direct",
@@ -160,6 +160,24 @@ const actions = {
 
     try {
       const transaction = await contract.registerParticipant(id);
+      await state.provider.waitForTransaction(transaction.hash);
+
+      actions.getAdminTournaments();
+      actions.getParticipantTournaments();
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  unregisterParticipant: async (id: number) => {
+    const signer = state.provider.getSigner();
+    const contract = new ethers.Contract(
+      state.contractAddress,
+      Brackets.abi,
+      signer
+    );
+
+    try {
+      const transaction = await contract.unregisterParticipant(id);
       await state.provider.waitForTransaction(transaction.hash);
 
       actions.getAdminTournaments();

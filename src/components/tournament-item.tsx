@@ -56,14 +56,15 @@ const TournamentItem: Component<Tournament> = ({
       <div class={divStyles}>Status: {status}</div>
       {admin && <div class={divStyles}>Admin</div>}
       {participant && <div class={divStyles}>Participant</div>}
-      {!participant && (
-        <button
-          onClick={() => actions.registerParticipant(id)}
-          class={buttonStyles}
-        >
-          Register as participant
-        </button>
-      )}
+      <button
+        onClick={() => {
+          if (!participant) actions.registerParticipant(id);
+          else actions.unregisterParticipant(id);
+        }}
+        class={buttonStyles}
+      >
+        {!participant ? "Register" : "Unregister"} as participant
+      </button>
     </li>
   );
 };
