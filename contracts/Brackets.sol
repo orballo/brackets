@@ -4,33 +4,32 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
+struct Tournament {
+    uint32 id;
+    uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
+    string registerMethod; // "direct" | "invitation"
+    string status; // "created" | "started" | "finished" | "canceled"
+}
+
+struct TournamentOptions {
+    uint8 numberOfPlayers;
+    string registerMethod;
+}
+
 contract Brackets is Ownable {
-    struct Tournament {
-        uint32 id;
-        uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
-        string registerMethod; // "direct" | "invitation"
-        string status; // "created" | "started" | "finished" | "canceled"
+    constructor() {
+        tournamentId = 0;
     }
 
-    struct TournamentOptions {
-        uint8 numberOfPlayers;
-        string registerMethod;
-    }
-
-    // struct TournamentPayload {
-    //     uint32 id;
-    //     uint8 numberOfPlayers;
-    //     string registerMethod;
-    //     string status;
-    //     address admin;
-    //     address[] participants;
-    // }
+    // Storage.
 
     uint32 tournamentId;
-
     mapping(uint32 => Tournament) tournaments;
     mapping(address => uint32[]) tournamentsByAdmin;
     mapping(address => uint32[]) tournamentsByParticipant;
+    mapping(uint32 => mapping(uint8 => address)) tournamentsBrackets;
+
+    // Modifiers.
 
     modifier onlyAdmin(uint32 _tournamentId) {
         bool isAdmin = false;
@@ -65,10 +64,6 @@ contract Brackets is Ownable {
             "Invalid value for `registerMethod`."
         );
         _;
-    }
-
-    constructor() {
-        tournamentId = 0;
     }
 
     /**
