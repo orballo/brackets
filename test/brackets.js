@@ -141,6 +141,12 @@ describe("Brackets", async () => {
     });
   });
 
+  describe("updateTournament", () => {
+    it("Should update the tournament withe the new options.");
+    it("Should fail if any value of the options is not valid.");
+    it("Should fail if the user is not the admin of the tournament.");
+  });
+
   describe("registerParticipant", () => {
     it("Should register the user for the tournament.", async () => {
       let tournaments = await brackets.getTournamentsByParticipant();

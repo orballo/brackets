@@ -32,14 +32,20 @@ contract Brackets is Ownable {
     mapping(address => uint32[]) tournamentsByAdmin;
     mapping(address => uint32[]) tournamentsByParticipant;
 
-    constructor() {
-        tournamentId = 0;
+    modifier onlyAdmin(uint32 _tournamentId) {
+        bool isAdmin = false;
+
+        for (uint32 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
+            if (tournamentsByAdmin[msg.sender][i] == _tournamentId) {
+                isAdmin = true;
+            }
+        }
+
+        require(isAdmin, "The user is not the admin of this tournament.");
+        _;
     }
 
-    /**
-     * Create a new tournament.
-     */
-    function createTournament(TournamentOptions memory _options) public {
+    modifier validateOptions(TournamentOptions memory _options) {
         // Validate `numberOfPlayers` option.
         require(
             _options.numberOfPlayers == 2 ||
@@ -58,7 +64,20 @@ contract Brackets is Ownable {
                 keccak256(bytes("invitation")),
             "Invalid value for `registerMethod`."
         );
+        _;
+    }
 
+    constructor() {
+        tournamentId = 0;
+    }
+
+    /**
+     * Create a new tournament.
+     */
+    function createTournament(TournamentOptions memory _options)
+        public
+        validateOptions(_options)
+    {
         // Populate the tournament.
         Tournament memory _tournament;
         _tournament.id = tournamentId;
@@ -73,6 +92,14 @@ contract Brackets is Ownable {
         // Increase the tournament id.
         tournamentId += 1;
     }
+
+    /**
+     * Update a tournament.
+     */
+    function updateTournament(
+        uint32 _tournamentId,
+        TournamentOptions memory _options
+    ) public onlyAdmin(_tournamentId) {}
 
     /**
      * Register a participant to a tournament.
