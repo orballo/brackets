@@ -19,8 +19,10 @@ const Main: Component = () => {
 
   return (
     <main class={mainStyles}>
-      <Show when={state.isConnected}>
+      <Show when={state.isConnected && !state.tournaments.currentId}>
         <CreateTournament />
+      </Show>
+      <Show when={state.isConnected}>
         <TournamentList />
       </Show>
       <Show when={!state.isConnected && state.isSynced}>

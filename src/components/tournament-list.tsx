@@ -1,15 +1,10 @@
-import { Component, onMount, For } from "solid-js";
+import { Component, For } from "solid-js";
 import { useStore } from "../store";
 import { css } from "@emotion/css";
 import Tournament from "./tournament-item";
 
 const TournamentList: Component = () => {
-  const { state, actions } = useStore();
-
-  onMount(() => {
-    actions.getAdminTournaments();
-    actions.getParticipantTournaments();
-  });
+  const { state } = useStore();
 
   const ulStyles = css`
     list-style: none;
@@ -26,8 +21,20 @@ const TournamentList: Component = () => {
   return (
     <ul class={ulStyles}>
       <For
-        each={state.tournaments.all}
-        fallback={<div>Use the form to create your first tournament.</div>}
+        each={
+          !state.tournaments.currentId
+            ? state.tournaments.all
+            : state.tournaments.currentTournament
+            ? [state.tournaments.currentTournament]
+            : []
+        }
+        fallback={
+          <div>
+            {!state.tournaments.currentId
+              ? "Use the form to create your first tournament."
+              : "Loading the tournament..."}
+          </div>
+        }
       >
         {(tournament) => <Tournament {...tournament} />}
       </For>

@@ -14,6 +14,8 @@ export interface State {
     all: Tournament[];
     admin: TournamentPayload[];
     participant: TournamentPayload[];
+    currentId: string;
+    currentTournament?: Tournament;
   };
 }
 

@@ -149,7 +149,9 @@ describe("Brackets", async () => {
 
   describe("registerParticipant", () => {
     it("Should register the user for the tournament.", async () => {
-      let tournaments = await brackets.getTournamentsByParticipant();
+      const [{ address }] = await ethers.getSigners();
+
+      let tournaments = await brackets.getTournamentsByParticipant(address);
 
       expect(tournaments).to.eql([]);
 
@@ -159,7 +161,7 @@ describe("Brackets", async () => {
       });
       brackets.registerParticipant(0);
 
-      tournaments = await brackets.getTournamentsByParticipant();
+      tournaments = await brackets.getTournamentsByParticipant(address);
 
       expect(tournaments.length).to.equal(1);
     });
@@ -169,7 +171,9 @@ describe("Brackets", async () => {
 
   describe("unregisterParticipant", () => {
     it("Should unregister the user from the tournament.", async () => {
-      let tournaments = await brackets.getTournamentsByParticipant();
+      const [{ address }] = await ethers.getSigners();
+
+      let tournaments = await brackets.getTournamentsByParticipant(address);
 
       expect(tournaments.length).to.equal(0);
 
@@ -189,7 +193,7 @@ describe("Brackets", async () => {
       brackets.registerParticipant(1);
       brackets.registerParticipant(2);
 
-      tournaments = await brackets.getTournamentsByParticipant();
+      tournaments = await brackets.getTournamentsByParticipant(address);
 
       expect(tournaments.length).to.equal(3);
 
@@ -197,7 +201,7 @@ describe("Brackets", async () => {
       brackets.unregisterParticipant(1);
       brackets.unregisterParticipant(0);
 
-      tournaments = await brackets.getTournamentsByParticipant();
+      tournaments = await brackets.getTournamentsByParticipant(address);
 
       expect(tournaments.length).to.equal(0);
     });
@@ -253,10 +257,6 @@ describe("Brackets", async () => {
     it("Should return all the tournaments where the user is the admin in descending order", async () => {
       const [, addressOne, addressTwo] = await ethers.getSigners();
 
-      let tournaments = await brackets.getTournamentsByAdmin();
-
-      expect(tournaments).to.eql([]);
-
       brackets.connect(addressOne).createTournament({
         numberOfPlayers: 2,
         registerMethod: "direct",
@@ -274,13 +274,17 @@ describe("Brackets", async () => {
         registerMethod: "direct",
       });
 
-      tournaments = await brackets.connect(addressOne).getTournamentsByAdmin();
+      tournaments = await brackets
+        .connect(addressOne)
+        .getTournamentsByAdmin(addressOne.address);
 
       expect(tournaments.length).to.equal(2);
       expect(tournaments[0].id).to.equal(2);
       expect(tournaments[1].id).to.equal(0);
 
-      tournaments = await brackets.connect(addressTwo).getTournamentsByAdmin();
+      tournaments = await brackets
+        .connect(addressTwo)
+        .getTournamentsByAdmin(addressTwo.address);
 
       expect(tournaments.length).to.equal(2);
       expect(tournaments[0].id).to.equal(3);

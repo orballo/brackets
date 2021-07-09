@@ -40,7 +40,7 @@ contract Brackets is Ownable {
             }
         }
 
-        require(isAdmin, "The user is not the admin of this tournament.");
+        require(isAdmin, "The account is not the admin of this tournament.");
         _;
     }
 
@@ -127,7 +127,7 @@ contract Brackets is Ownable {
             }
         }
 
-        require(removed, "The user is not registered in that tournament.");
+        require(removed, "The account is not registered for this tournament.");
 
         tournamentsByParticipant[msg.sender].pop();
     }
@@ -135,16 +135,20 @@ contract Brackets is Ownable {
     /**
      * Return all the tournaments where the user is the admin.
      */
-    function getTournamentsByAdmin() public view returns (Tournament[] memory) {
+    function getTournamentsByAdmin(address _sender)
+        public
+        view
+        returns (Tournament[] memory)
+    {
         // Initialize empty array.
         Tournament[] memory _tournaments = new Tournament[](
-            tournamentsByAdmin[msg.sender].length
+            tournamentsByAdmin[_sender].length
         );
 
         // Assign structs to array.
-        for (uint32 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
-            uint32 _tournamentId = tournamentsByAdmin[msg.sender][
-                tournamentsByAdmin[msg.sender].length - i - 1
+        for (uint32 i = 0; i < tournamentsByAdmin[_sender].length; i++) {
+            uint32 _tournamentId = tournamentsByAdmin[_sender][
+                tournamentsByAdmin[_sender].length - i - 1
             ];
             _tournaments[i] = tournaments[_tournamentId];
         }
@@ -155,24 +159,20 @@ contract Brackets is Ownable {
     /**
      * Return all the tournaments where the account is a participant.
      */
-    function getTournamentsByParticipant()
+    function getTournamentsByParticipant(address _sender)
         public
         view
         returns (Tournament[] memory)
     {
         // Initialize empty array.
         Tournament[] memory _tournaments = new Tournament[](
-            tournamentsByParticipant[msg.sender].length
+            tournamentsByParticipant[_sender].length
         );
 
         // Assign structs to array.
-        for (
-            uint32 i = 0;
-            i < tournamentsByParticipant[msg.sender].length;
-            i++
-        ) {
-            uint32 _tournamentId = tournamentsByParticipant[msg.sender][
-                tournamentsByParticipant[msg.sender].length - i - 1
+        for (uint32 i = 0; i < tournamentsByParticipant[_sender].length; i++) {
+            uint32 _tournamentId = tournamentsByParticipant[_sender][
+                tournamentsByParticipant[_sender].length - i - 1
             ];
             _tournaments[i] = tournaments[_tournamentId];
         }
@@ -183,12 +183,7 @@ contract Brackets is Ownable {
     /**
      * Return all the tournaments stored in the contract.
      */
-    function getTournaments()
-        public
-        view
-        onlyOwner
-        returns (Tournament[] memory)
-    {
+    function getTournaments() public view returns (Tournament[] memory) {
         // Initialize empty array.
         Tournament[] memory _tournaments = new Tournament[](tournamentId);
 
