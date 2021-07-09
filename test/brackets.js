@@ -309,15 +309,32 @@ describe("Brackets", async () => {
         registerMethod: "direct",
       });
 
-      let tournament = await brackets.getTournament(1);
-
-      expect(tournament.id).to.equal(1);
-      expect(tournament.numberOfPlayers).to.equal(4);
-
-      tournament = await brackets.getTournament(0);
+      let tournament = await brackets.getTournament(0);
 
       expect(tournament.id).to.equal(0);
       expect(tournament.numberOfPlayers).to.equal(2);
+
+      tournament = await brackets.getTournament(1);
+
+      expect(tournament.id).to.equal(1);
+      expect(tournament.numberOfPlayers).to.equal(4);
+    });
+
+    it("Should fail if the tournament id is invalid.", async () => {
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+
+      let tournament;
+
+      try {
+        tournament = await brackets.getTournament(1);
+      } catch (error) {
+        expect(error.message).to.include("The tournament id is invalid.");
+      }
+
+      expect(tournament).to.be.undefined;
     });
   });
 });

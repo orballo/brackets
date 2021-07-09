@@ -200,6 +200,11 @@ contract Brackets is Ownable {
         view
         returns (Tournament memory)
     {
+        require(
+            tournaments[_tournamentId].numberOfPlayers != 0,
+            "The tournament id is invalid."
+        );
+
         return tournaments[_tournamentId];
     }
 }

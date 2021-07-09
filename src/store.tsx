@@ -2,8 +2,8 @@ import { createStore } from "solid-js/store";
 import { createContext, onMount, useContext } from "solid-js";
 import { ethers } from "ethers";
 import detectProvider from "@metamask/detect-provider";
-import Crypto from "crypto-js";
 import { State, TournamentPayload } from "./types";
+import { encrypt, decrypt } from "./utils";
 
 import Brackets from "../artifacts/contracts/Brackets.sol/Brackets.json";
 
@@ -13,7 +13,7 @@ const initialState: State = {
   user: "",
   ethereum: null,
   provider: null,
-  contractAddress: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+  contractAddress: "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
   createTournament: {
     numberOfPlayers: 2,
     registerMethod: "direct",
@@ -40,7 +40,8 @@ const initialState: State = {
     admin: [],
     participant: [],
     get currentId() {
-      const [, id] = window.location.pathname.match(/\/t\/([\w\d=]*)\//);
+      const matches = window.location.pathname.match(/\/t\/([\w\d]*)\/?/);
+      const id = matches ? decrypt(matches[1]) : null;
       return id;
     },
   },
@@ -51,8 +52,6 @@ const [state, setState] = createStore(initialState);
 const actions = {
   detectProvider: async () => {
     const ethereum: any = await detectProvider();
-
-    console.log("state:", state.tournaments.currentId);
 
     if (ethereum) {
       // Store the ethereum object in the state.
@@ -116,9 +115,7 @@ const actions = {
 
     const tournaments = response.map((item: TournamentPayload) => ({
       id: item.id,
-      code: btoa(
-        Crypto.Rabbit.encrypt(item.id.toString(), "brackets").toString()
-      ),
+      code: encrypt(item.id.toString()),
       numberOfPlayers: item.numberOfPlayers,
       registerMethod: item.registerMethod,
       status: item.status,
@@ -140,9 +137,7 @@ const actions = {
 
     const tournaments = response.map((item: TournamentPayload) => ({
       id: item.id,
-      code: btoa(
-        Crypto.Rabbit.encrypt(item.id.toString(), "brackets").toString()
-      ),
+      code: encrypt(item.id.toString()),
       numberOfPlayers: item.numberOfPlayers,
       registerMethod: item.registerMethod,
       status: item.status,
