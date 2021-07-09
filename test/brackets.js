@@ -167,6 +167,7 @@ describe("Brackets", async () => {
     });
 
     it("Should fail if the tournament is already started.");
+    it("Should fail if the account is already registered for the tournament.");
   });
 
   describe("unregisterParticipant", () => {
@@ -206,7 +207,7 @@ describe("Brackets", async () => {
       expect(tournaments.length).to.equal(0);
     });
 
-    it("Should fail if the user is not registered for the tournament.");
+    it("Should fail if the account is not registered for the tournament.");
   });
 
   describe("getTournaments", () => {

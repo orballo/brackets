@@ -23,7 +23,9 @@ const Header: Component = () => {
 
   return (
     <header class={headerStyles}>
-      <h1 class={titleStyles}>Brackets</h1>
+      <a href="/">
+        <h1 class={titleStyles}>Brackets</h1>
+      </a>
       <Show when={state.isConnected}>
         <UserIcon userAddress={state.user} />
       </Show>

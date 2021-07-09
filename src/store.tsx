@@ -69,6 +69,7 @@ const actions = {
           actions.getAdminTournaments(),
           actions.getParticipantTournaments(),
         ]);
+        if (state.tournaments.currentId) actions.getTournament();
         setState("isConnected", true);
       }
 
@@ -81,6 +82,7 @@ const actions = {
             actions.getAdminTournaments(),
             actions.getParticipantTournaments(),
           ]);
+          if (state.tournaments.currentId) actions.getTournament();
           setState("provider", provider);
         } else {
           setState("isConnected", false);
@@ -101,6 +103,26 @@ const actions = {
       setState("provider", provider);
       setState("isConnected", true);
     }
+  },
+  getTournament: async () => {
+    const contract = new ethers.Contract(
+      state.contractAddress,
+      Brackets.abi,
+      state.provider
+    );
+
+    const response = await contract.getTournament(state.tournaments.currentId);
+
+    const tournament = {
+      id: response.id,
+      code: encrypt(response.id.toString()),
+      numberOfPlayers: response.numberOfPlayers,
+      registerMethod: response.registerMethod,
+      status: response.status,
+      admin: true,
+    };
+
+    setState("tournaments", "currentTournament", tournament);
   },
   getAdminTournaments: async () => {
     const contract = new ethers.Contract(
