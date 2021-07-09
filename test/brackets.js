@@ -305,7 +305,7 @@ describe("Brackets", async () => {
         registerMethod: "direct",
       });
       brackets.createTournament({
-        numberOfPlayers: 2,
+        numberOfPlayers: 4,
         registerMethod: "direct",
       });
 
@@ -314,7 +314,7 @@ describe("Brackets", async () => {
       expect(tournament.id).to.equal(1);
       expect(tournament.numberOfPlayers).to.equal(4);
 
-      tournament = await brackets.getTournament(1);
+      tournament = await brackets.getTournament(0);
 
       expect(tournament.id).to.equal(0);
       expect(tournament.numberOfPlayers).to.equal(2);

@@ -198,7 +198,7 @@ contract Brackets is Ownable {
     function getTournament(uint32 _tournamentId)
         public
         view
-        returns (Tournament[] memory)
+        returns (Tournament memory)
     {
         return tournaments[_tournamentId];
     }
