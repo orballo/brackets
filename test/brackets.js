@@ -287,7 +287,7 @@ describe("Brackets", async () => {
         .getTournamentsByAdmin(addressTwo.address);
 
       expect(tournaments.length).to.equal(2);
-      expect(tournaments[0].id).to.equal(3);
+      4;
       expect(tournaments[1].id).to.equal(1);
     });
   });
@@ -298,7 +298,26 @@ describe("Brackets", async () => {
     );
   });
 
-  describe("getTournamentById", () => {
-    it("Should return a tournament by id");
+  describe("getTournament", () => {
+    it("Should return a tournament by id", async () => {
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+
+      let tournament = await brackets.getTournament(1);
+
+      expect(tournament.id).to.equal(1);
+      expect(tournament.numberOfPlayers).to.equal(4);
+
+      tournament = await brackets.getTournament(1);
+
+      expect(tournament.id).to.equal(0);
+      expect(tournament.numberOfPlayers).to.equal(2);
+    });
   });
 });
