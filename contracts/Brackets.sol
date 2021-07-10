@@ -169,59 +169,65 @@ contract Brackets is Ownable {
         public
         validateTournamentId(_tournamentId)
     {
-        bool removed = false;
         bool removedFromBrackets = false;
+        bool isAdmin = tournamentToBrackets[_tournamentId][0] == msg.sender;
 
-        // Removing the user from the array of tournaments of the account
-        // and from the brackets.
-        for (uint32 i = 0; i < accountToTournaments[msg.sender].length; i++) {
-            // Check if the tournament ID and the id of the array matches,
-            // or if the tournament was already removed.
+        // Get the number of iterations we need
+        // to explore the mapping.
+        uint8 iterations = tournaments[_tournamentId].numberOfPlayers;
+
+        // Start looking for the address of the player
+        // in the mapping.
+        for (uint8 i = 1; i <= iterations; i++) {
+            // If we find it we start pushing the players up
+            // in the brackets.
             if (
-                removed ||
-                (accountToTournaments[msg.sender][i] == _tournamentId)
+                removedFromBrackets ||
+                tournamentToBrackets[_tournamentId][i] == msg.sender
             ) {
-                // If it is not the last element in the array
-                // we start pushing the elements of the array
-                // one position.
-                if (i != accountToTournaments[msg.sender].length - 1) {
-                    accountToTournaments[msg.sender][i] = accountToTournaments[
-                        msg.sender
-                    ][i + 1];
-                }
-                // If the element was just removed we proceed
-                // to remove it from the brackets.
-                if (!removed) {
-                    // Get the number of iterations we need
-                    // to explore the mapping.
-                    uint8 numberOfPlayers = tournaments[
-                        accountToTournaments[msg.sender][i]
-                    ]
-                    .numberOfPlayers;
-
-                    // Start looking for the address of the player
-                    // in the mapping.
-                    for (uint8 j = 1; j <= numberOfPlayers; j++) {
-                        // If we find it we start pushing the players up
-                        // in the brackets.
-                        if (
-                            removedFromBrackets ||
-                            tournamentToBrackets[_tournamentId][j] == msg.sender
-                        ) {
-                            tournamentToBrackets[_tournamentId][
-                                j
-                            ] = tournamentToBrackets[_tournamentId][j + 1];
-                            removedFromBrackets = true;
-                        }
-                    }
-                }
-                removed = true;
+                tournamentToBrackets[_tournamentId][i] = tournamentToBrackets[
+                    _tournamentId
+                ][i + 1];
+                removedFromBrackets = true;
             }
         }
 
-        require(removed, "The account is not registered for this tournament.");
+        require(
+            removedFromBrackets,
+            "The account is not registered for this tournament."
+        );
 
-        accountToTournaments[msg.sender].pop();
+        bool removedFromArray = false;
+
+        // Removing the user from the array of tournaments of the account
+        // and from the brackets.
+        if (removedFromBrackets && !isAdmin) {
+            for (
+                uint32 i = 0;
+                i < accountToTournaments[msg.sender].length;
+                i++
+            ) {
+                // Check if the tournament ID and the id of the array matches,
+                // or if the tournament was already removed.
+                if (
+                    removedFromArray ||
+                    (accountToTournaments[msg.sender][i] == _tournamentId)
+                ) {
+                    // If it is not the last element in the array
+                    // we start pushing the elements of the array
+                    // one position.
+                    if (i != accountToTournaments[msg.sender].length - 1) {
+                        accountToTournaments[msg.sender][
+                            i
+                        ] = accountToTournaments[msg.sender][i + 1];
+                    }
+
+                    removedFromArray = true;
+                }
+            }
+
+            accountToTournaments[msg.sender].pop();
+        }
     }
 
     /**

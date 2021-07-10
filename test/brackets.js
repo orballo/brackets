@@ -184,7 +184,7 @@ describe("Brackets", async () => {
     });
   });
 
-  describe.only("unregisterParticipant", () => {
+  describe("unregisterParticipant", () => {
     it("Should unregister the user from the tournament.", async () => {
       const [owner, one, two, three] = await ethers.getSigners();
 
@@ -258,6 +258,8 @@ describe("Brackets", async () => {
         "The account is not registered for this tournament."
       );
     });
+
+    it("Should fail if the tournament is already started");
   });
 
   describe("getTournament", () => {
