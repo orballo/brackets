@@ -191,6 +191,9 @@ contract Brackets is Ownable {
     //     tournamentsByParticipant[msg.sender].pop();
     // }
 
+    /**
+     * Returns a tournament by id.
+     */
     function getTournament(uint32 _id)
         public
         view
@@ -217,6 +220,9 @@ contract Brackets is Ownable {
         return _tournament;
     }
 
+    /**
+     * Returns all the tournaments for one account.
+     */
     function getTournaments(address _account)
         public
         view
