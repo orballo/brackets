@@ -1,7 +1,12 @@
-const { expect } = require("chai");
+const { use, expect } = require("chai");
 const { ethers } = require("hardhat");
+const { solidity } = require("ethereum-waffle");
+
+use(solidity);
 
 describe("Brackets", async () => {
+  let zeroAddress = "0x0000000000000000000000000000000000000000";
+
   let Brackets;
   let brackets;
 
@@ -18,6 +23,8 @@ describe("Brackets", async () => {
 
   describe("createTournament", () => {
     it("Should create tournaments with secuential ids.", async () => {
+      const [owner] = await ethers.getSigners();
+
       await brackets.createTournament({
         numberOfPlayers: 2,
       });
@@ -28,7 +35,7 @@ describe("Brackets", async () => {
         numberOfPlayers: 2,
       });
 
-      tournaments = await brackets.getTournaments();
+      let tournaments = await brackets.getTournaments(owner.address);
 
       expect(tournaments.length).to.equal(3);
       expect(tournaments[0].id).to.equal(2);
@@ -37,9 +44,7 @@ describe("Brackets", async () => {
     });
 
     it("Should create tournaments with all the possible options for `numberOfPlayers`.", async () => {
-      let tournaments = await brackets.getTournaments();
-
-      expect(tournaments).to.eql([]);
+      const [owner] = await ethers.getSigners();
 
       await brackets.createTournament({
         numberOfPlayers: 2,
@@ -57,7 +62,7 @@ describe("Brackets", async () => {
         numberOfPlayers: 32,
       });
 
-      tournaments = await brackets.getTournaments();
+      let tournaments = await brackets.getTournaments(owner.address);
 
       expect(tournaments.length).to.equal(5);
       expect(tournaments[0].numberOfPlayers).to.equal(32);
@@ -71,7 +76,6 @@ describe("Brackets", async () => {
       try {
         await brackets.createTournament({
           numberOfPlayers: 3,
-          registerMethod: "direct",
         });
       } catch (error) {
         expect(error.message).to.include(
@@ -80,49 +84,14 @@ describe("Brackets", async () => {
       }
     });
 
-    it("Should create tournaments with all the possible options for `registerMethod`.", async () => {
-      let tournaments = await brackets.getTournaments();
-
-      expect(tournaments).to.eql([]);
-
-      await brackets.createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-      await brackets.createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "invitation",
-      });
-
-      tournaments = await brackets.getTournaments();
-
-      expect(tournaments.length).to.equal(2);
-      expect(tournaments[0].registerMethod).to.equal("invitation");
-      expect(tournaments[1].registerMethod).to.equal("direct");
-    });
-
-    it("Should fail if the `registerMethod` is not a valid value.", async () => {
-      try {
-        await brackets.createTournament({
-          numberOfPlayers: 4,
-          registerMethod: "random",
-        });
-      } catch (error) {
-        expect(error.message).to.include("Invalid value for `registerMethod`.");
-      }
-    });
-
     it("Should create tournaments with status `created`.", async () => {
-      let tournaments = await brackets.getTournaments();
-
-      expect(tournaments).to.eql([]);
+      const [owner] = await ethers.getSigners();
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        registerMethod: "direct",
       });
 
-      tournaments = await brackets.getTournaments();
+      tournaments = await brackets.getTournaments(owner.address);
 
       expect(tournaments.length).to.equal(1);
       expect(tournaments[0].status).to.equal("created");
@@ -135,7 +104,7 @@ describe("Brackets", async () => {
     it("Should fail if the user is not the admin of the tournament.");
   });
 
-  describe.only("registerParticipant", () => {
+  describe("registerParticipant", () => {
     it("Should register the user for the tournament.", async () => {
       const [owner, one] = await ethers.getSigners();
 
@@ -215,47 +184,83 @@ describe("Brackets", async () => {
     });
   });
 
-  describe("unregisterParticipant", () => {
+  describe.only("unregisterParticipant", () => {
     it("Should unregister the user from the tournament.", async () => {
-      const [{ address }] = await ethers.getSigners();
-
-      let tournaments = await brackets.getTournamentsByParticipant(address);
-
-      expect(tournaments.length).to.equal(0);
+      const [owner, one, two, three] = await ethers.getSigners();
 
       brackets.createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
+        numberOfPlayers: 4,
       });
-      brackets.createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-      brackets.createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-      brackets.registerParticipant(0);
-      brackets.registerParticipant(1);
-      brackets.registerParticipant(2);
 
-      tournaments = await brackets.getTournamentsByParticipant(address);
+      await brackets.connect(owner).registerParticipant(0);
+      await brackets.connect(one).registerParticipant(0);
+      await brackets.connect(two).registerParticipant(0);
+      await brackets.connect(three).registerParticipant(0);
 
-      expect(tournaments.length).to.equal(3);
+      let tournament = await brackets.getTournament(0);
 
-      brackets.unregisterParticipant(2);
-      brackets.unregisterParticipant(1);
-      brackets.unregisterParticipant(0);
+      expect(tournament.participants[0]).to.be.equal(owner.address);
+      expect(tournament.participants[1]).to.be.equal(one.address);
+      expect(tournament.participants[2]).to.be.equal(two.address);
+      expect(tournament.participants[3]).to.be.equal(three.address);
 
-      tournaments = await brackets.getTournamentsByParticipant(address);
+      await brackets.connect(three).unregisterParticipant(0);
 
-      expect(tournaments.length).to.equal(0);
+      tournament = await brackets.getTournament(0);
+
+      expect(tournament.participants[0]).to.be.equal(owner.address);
+      expect(tournament.participants[1]).to.be.equal(one.address);
+      expect(tournament.participants[2]).to.be.equal(two.address);
+      expect(tournament.participants[3]).to.be.equal(zeroAddress);
+
+      await brackets.connect(owner).unregisterParticipant(0);
+
+      tournament = await brackets.getTournament(0);
+
+      expect(tournament.participants[0]).to.be.equal(one.address);
+      expect(tournament.participants[1]).to.be.equal(two.address);
+      expect(tournament.participants[2]).to.be.equal(zeroAddress);
+      expect(tournament.participants[3]).to.be.equal(zeroAddress);
     });
 
-    it("Should fail if the account is not registered for the tournament.");
+    it("Should fail if the tournament id is invalid.", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 4,
+      });
+
+      let error;
+
+      try {
+        await brackets.unregisterParticipant(1);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include("The tournament ID is invalid.");
+    });
+
+    it("Should fail if the account is not registered for the tournament.", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 4,
+      });
+
+      let error;
+
+      try {
+        await brackets.unregisterParticipant(0);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include(
+        "The account is not registered for this tournament."
+      );
+    });
   });
 
-  describe.only("getTournament", () => {
+  describe("getTournament", () => {
     it("Should return a tournament by id", async () => {
       const [owner, one, two] = await ethers.getSigners();
 
@@ -294,7 +299,7 @@ describe("Brackets", async () => {
     });
   });
 
-  describe.only("getTournaments", () => {
+  describe("getTournaments", () => {
     it("Should return the tournaments by account sorted descending.", async () => {
       const [owner, one, two] = await ethers.getSigners();
 
@@ -351,50 +356,5 @@ describe("Brackets", async () => {
       expect(tournaments[1].id).to.equal(1);
       expect(tournaments[2].id).to.equal(0);
     });
-  });
-
-  describe("getTournamentsByAdmin", () => {
-    it("Should return all the tournaments where the user is the admin in descending order", async () => {
-      const [, addressOne, addressTwo] = await ethers.getSigners();
-
-      brackets.connect(addressOne).createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-      brackets.connect(addressTwo).createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-      brackets.connect(addressOne).createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-      brackets.connect(addressTwo).createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-
-      tournaments = await brackets
-        .connect(addressOne)
-        .getTournamentsByAdmin(addressOne.address);
-
-      expect(tournaments.length).to.equal(2);
-      expect(tournaments[0].id).to.equal(2);
-      expect(tournaments[1].id).to.equal(0);
-
-      tournaments = await brackets
-        .connect(addressTwo)
-        .getTournamentsByAdmin(addressTwo.address);
-
-      expect(tournaments.length).to.equal(2);
-      4;
-      expect(tournaments[1].id).to.equal(1);
-    });
-  });
-
-  describe("getTournamentsByParticipant", () => {
-    it(
-      "Should return all the tournaments where the user is a participant in descending order"
-    );
   });
 });

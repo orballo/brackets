@@ -56,14 +56,6 @@ contract Brackets is Ownable {
     //     _;
     // }
 
-    modifier validateTournamentId(uint32 _id) {
-        require(
-            keccak256(bytes(tournaments[_id].status)) != keccak256(bytes("")),
-            "The tournament ID is invalid."
-        );
-        _;
-    }
-
     modifier validateOptions(TournamentOptions memory _options) {
         // Validate `numberOfPlayers` option.
         require(
@@ -73,6 +65,14 @@ contract Brackets is Ownable {
                 _options.numberOfPlayers == 16 ||
                 _options.numberOfPlayers == 32,
             "Invalid value for `numberOfPlayers`."
+        );
+        _;
+    }
+
+    modifier validateTournamentId(uint32 _id) {
+        require(
+            keccak256(bytes(tournaments[_id].status)) != keccak256(bytes("")),
+            "The tournament ID is invalid."
         );
         _;
     }
@@ -162,34 +162,67 @@ contract Brackets is Ownable {
         }
     }
 
-    // /**
-    //  * Unregister a participant from a tournament.
-    //  */
-    // function unregisterParticipant(uint32 _tournamentId) public {
-    //     bool removed = false;
+    /**
+     * Unregister a participant from a tournament.
+     */
+    function unregisterParticipant(uint32 _tournamentId)
+        public
+        validateTournamentId(_tournamentId)
+    {
+        bool removed = false;
+        bool removedFromBrackets = false;
 
-    //     for (
-    //         uint32 i = 0;
-    //         i < tournamentsByParticipant[msg.sender].length;
-    //         i++
-    //     ) {
-    //         if (
-    //             removed ||
-    //             tournamentsByParticipant[msg.sender][i] == _tournamentId
-    //         ) {
-    //             if (i != tournamentsByParticipant[msg.sender].length - 1) {
-    //                 tournamentsByParticipant[msg.sender][
-    //                     i
-    //                 ] = tournamentsByParticipant[msg.sender][i + 1];
-    //             }
-    //             removed = true;
-    //         }
-    //     }
+        // Removing the user from the array of tournaments of the account
+        // and from the brackets.
+        for (uint32 i = 0; i < accountToTournaments[msg.sender].length; i++) {
+            // Check if the tournament ID and the id of the array matches,
+            // or if the tournament was already removed.
+            if (
+                removed ||
+                (accountToTournaments[msg.sender][i] == _tournamentId)
+            ) {
+                // If it is not the last element in the array
+                // we start pushing the elements of the array
+                // one position.
+                if (i != accountToTournaments[msg.sender].length - 1) {
+                    accountToTournaments[msg.sender][i] = accountToTournaments[
+                        msg.sender
+                    ][i + 1];
+                }
+                // If the element was just removed we proceed
+                // to remove it from the brackets.
+                if (!removed) {
+                    // Get the number of iterations we need
+                    // to explore the mapping.
+                    uint8 numberOfPlayers = tournaments[
+                        accountToTournaments[msg.sender][i]
+                    ]
+                    .numberOfPlayers;
 
-    //     require(removed, "The account is not registered for this tournament.");
+                    // Start looking for the address of the player
+                    // in the mapping.
+                    for (uint8 j = 1; j <= numberOfPlayers; j++) {
+                        // If we find it we start pushing the players up
+                        // in the brackets.
+                        if (
+                            removedFromBrackets ||
+                            tournamentToBrackets[_tournamentId][j] == msg.sender
+                        ) {
+                            tournamentToBrackets[_tournamentId][
+                                j
+                            ] = tournamentToBrackets[_tournamentId][j + 1];
+                            removedFromBrackets = true;
+                        }
+                    }
+                }
+                removed = true;
+            }
+        }
 
-    //     tournamentsByParticipant[msg.sender].pop();
-    // }
+        require(removed, "The account is not registered for this tournament.");
+
+        accountToTournaments[msg.sender].pop();
+    }
 
     /**
      * Returns a tournament by id.
