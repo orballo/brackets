@@ -1,9 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { deployContract } = require("ethereum-waffle");
-const Brackets = require("../artifacts/contracts/Brackets.sol/Brackets.json");
 
 describe("Brackets", async () => {
+  let Brackets;
   let brackets;
 
   beforeEach(async () => {
@@ -136,38 +135,84 @@ describe("Brackets", async () => {
     it("Should fail if the user is not the admin of the tournament.");
   });
 
-  describe("registerParticipant", () => {
+  describe.only("registerParticipant", () => {
     it("Should register the user for the tournament.", async () => {
-      const [owner] = await ethers.getSigners();
+      const [owner, one] = await ethers.getSigners();
 
       await brackets.createTournament({
         numberOfPlayers: 2,
       });
 
       await brackets.registerParticipant(0);
+      await brackets.connect(one).registerParticipant(0);
 
       let tournament = await brackets.getTournament(0);
 
       expect(tournament.participants[0]).to.equal(owner.address);
+      expect(tournament.participants[1]).to.equal(one.address);
     });
 
-    it.only("Should fail if the account is already registered for the tournament.", async () => {
+    it("Should fail if the account is already registered for the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
       });
 
       await brackets.registerParticipant(0);
 
+      let error;
+
       try {
         await brackets.registerParticipant(0);
-      } catch (error) {
-        console.error("error:", error);
+      } catch (e) {
+        error = e;
       }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include(
+        "The account is already registered for this tournament."
+      );
     });
 
-    it("Should fail if the brackets are already full.");
+    it("Should fail if the tournament is already full.", async () => {
+      const [owner, one, two] = await ethers.getSigners();
+
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+      });
+
+      await brackets.connect(owner).registerParticipant(0);
+      await brackets.connect(one).registerParticipant(0);
+
+      let error;
+
+      try {
+        await brackets.connect(two).registerParticipant(0);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include("The tournament is already full.");
+    });
+
     it("Should fail if the tournament is already started.");
-    it("Should fail if the tournament doesn't exist");
+
+    it("Should fail if the tournament doesn't exist", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+      });
+
+      let error;
+
+      try {
+        await brackets.registerParticipant(1);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include("The tournament ID is invalid.");
+    });
   });
 
   describe("unregisterParticipant", () => {
@@ -208,6 +253,78 @@ describe("Brackets", async () => {
     });
 
     it("Should fail if the account is not registered for the tournament.");
+  });
+
+  describe.only("getTournament", () => {
+    it("Should return a tournament by id", async () => {
+      const [owner, one, two] = await ethers.getSigners();
+
+      await brackets.createTournament({ numberOfPlayers: 2 });
+
+      await brackets.connect(one).registerParticipant(0);
+      await brackets.connect(two).registerParticipant(0);
+
+      let tournament = await brackets.getTournament(0);
+
+      expect(tournament.id).to.equal(0);
+      expect(tournament.numberOfPlayers).to.equal(2);
+      expect(tournament.status).to.equal("created");
+      expect(tournament.admin).to.equal(owner.address);
+      expect(tournament.participants.length).to.equal(2);
+      expect(tournament.participants[0]).to.equal(one.address);
+      expect(tournament.participants[1]).to.equal(two.address);
+    });
+
+    it("Should fail if the tournament id is invalid.", async () => {
+      brackets.createTournament({
+        numberOfPlayers: 2,
+        registerMethod: "direct",
+      });
+
+      let error;
+
+      try {
+        await brackets.getTournament(1);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include("The tournament ID is invalid.");
+    });
+  });
+
+  describe.only("getTournaments", () => {
+    it("Should return the tournaments by account sorted descending.", async () => {
+      const [owner, one, two] = await ethers.getSigners();
+
+      await brackets.connect(owner).createTournament({
+        numberOfPlayers: 2,
+      });
+      await brackets.connect(one).createTournament({
+        numberOfPlayers: 2,
+      });
+      await brackets.connect(two).createTournament({
+        numberOfPlayers: 2,
+      });
+
+      await brackets.connect(owner).registerParticipant(1);
+      await brackets.connect(owner).registerParticipant(2);
+
+      let tournaments = await brackets
+        .connect(owner)
+        .getTournaments(owner.address);
+
+      expect(tournaments.length).to.equal(3);
+      expect(tournaments[0].id).to.equal(2);
+      expect(tournaments[1].id).to.equal(1);
+      expect(tournaments[2].id).to.equal(0);
+
+      tournaments = await brackets.connect(one).getTournaments(one.address);
+
+      expect(tournaments.length).to.equal(1);
+      expect(tournaments[0].id).to.equal(1);
+    });
   });
 
   describe("getAllTournaments", () => {
@@ -279,44 +396,5 @@ describe("Brackets", async () => {
     it(
       "Should return all the tournaments where the user is a participant in descending order"
     );
-  });
-
-  describe("getTournament", () => {
-    it("Should return a tournament by id", async () => {
-      const [owner, one, two] = await ethers.getSigners();
-
-      await brackets.createTournament({ numberOfPlayers: 2 });
-
-      let tournament = await brackets.getTournament(0);
-
-      expect(tournament.id).to.equal(0);
-      expect(tournament.numberOfPlayers).to.equal(2);
-      expect(tournament.status).to.equal("created");
-      expect(tournament.admin).to.equal(owner.address);
-      expect(tournament.participants.length).to.equal(2);
-      expect(tournament.participants[0]).to.equal(one.address);
-      expect(tournament.participants[1]).to.equal(two.address);
-    });
-
-    it("Should fail if the tournament id is invalid.", async () => {
-      brackets.createTournament({
-        numberOfPlayers: 2,
-        registerMethod: "direct",
-      });
-
-      let tournament;
-
-      try {
-        tournament = await brackets.getTournament(1);
-      } catch (error) {
-        expect(error.message).to.include("The tournament id is invalid.");
-      }
-
-      expect(tournament).to.be.undefined;
-    });
-  });
-
-  describe("getTournaments", () => {
-    it("Should return the tournaments by account.");
   });
 });

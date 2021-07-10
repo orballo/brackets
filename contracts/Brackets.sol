@@ -56,6 +56,14 @@ contract Brackets is Ownable {
     //     _;
     // }
 
+    modifier validateTournamentId(uint32 _id) {
+        require(
+            keccak256(bytes(tournaments[_id].status)) != keccak256(bytes("")),
+            "The tournament ID is invalid."
+        );
+        _;
+    }
+
     modifier validateOptions(TournamentOptions memory _options) {
         // Validate `numberOfPlayers` option.
         require(
@@ -102,8 +110,42 @@ contract Brackets is Ownable {
     /**
      * Register a participant for a tournament.
      */
-    function registerParticipant(uint32 _tournamentId) public {
+    function registerParticipant(uint32 _tournamentId)
+        public
+        validateTournamentId(_tournamentId)
+    {
+        bool hasRegistered = false;
         bool alreadyExists = false;
+
+        // Check that the tournament is not started.
+        require(
+            keccak256(bytes(tournaments[_tournamentId].status)) ==
+                keccak256(bytes("created")),
+            "The tournament has already started."
+        );
+
+        // Add the account to the tournament brackets.
+        for (
+            uint8 i = 1;
+            i <= tournaments[_tournamentId].numberOfPlayers;
+            i++
+        ) {
+            // Check that the account is not already registered.
+            require(
+                tournamentToBrackets[_tournamentId][i] != msg.sender,
+                "The account is already registered for this tournament."
+            );
+
+            // If there is an empty space, register the account.
+            if (tournamentToBrackets[_tournamentId][i] == address(0)) {
+                tournamentToBrackets[_tournamentId][i] = msg.sender;
+                hasRegistered = true;
+                break;
+            }
+        }
+
+        // Check if the tournament was full.
+        require(hasRegistered, "The tournament is already full.");
 
         // Check if the tournament is already in the
         // list of tournaments for this account.
@@ -114,25 +156,9 @@ contract Brackets is Ownable {
             }
         }
 
+        // Add the tournament to the account.
         if (!alreadyExists) {
             accountToTournaments[msg.sender].push(_tournamentId);
-        }
-
-        // Add the account to the tournament brackets.
-        for (
-            uint8 i = 1;
-            i <= tournaments[_tournamentId].numberOfPlayers;
-            i++
-        ) {
-            require(
-                tournamentToBrackets[_tournamentId][i] != msg.sender,
-                "The account is already registered for this tournament."
-            );
-
-            if (tournamentToBrackets[_tournamentId][i] == address(0)) {
-                tournamentToBrackets[_tournamentId][i] = msg.sender;
-                break;
-            }
         }
     }
 
@@ -168,13 +194,9 @@ contract Brackets is Ownable {
     function getTournament(uint32 _id)
         public
         view
+        validateTournamentId(_id)
         returns (TournamentPayload memory)
     {
-        require(
-            tournaments[_id].numberOfPlayers != 0,
-            "The tournament ID is invalid."
-        );
-
         // Create a tournament object.
         TournamentPayload memory _tournament;
         _tournament.id = tournaments[_id].id;
@@ -198,79 +220,50 @@ contract Brackets is Ownable {
     function getTournaments(address _account)
         public
         view
-        returns (Tournament[] memory)
+        returns (TournamentPayload[] memory)
     {
+        // Check that the account has tournaments.
         require(
             accountToTournaments[_account].length > 0,
             "The account doesn't have any tournaments."
         );
-        // Initialize empty arrays.
 
-        // Tournament[] memory _adminTournaments = new Tournament[](
-        //     tournamentsByAdmin[_sender].length
-        // );
+        // Initialize empty arrays.
+        TournamentPayload[] memory _tournaments = new TournamentPayload[](
+            accountToTournaments[_account].length
+        );
+
+        for (uint32 i = 0; i < _tournaments.length; i++) {
+            _tournaments[i] = getTournament(
+                accountToTournaments[_account][
+                    accountToTournaments[_account].length - i - 1
+                ]
+            );
+        }
+
+        return _tournaments;
     }
 
-    // /**
-    //  * Return all the tournaments where the user is the admin.
-    //  */
-    // function getTournamentsByAdmin(address _sender)
-    //     public
-    //     view
-    //     returns (Tournament[] memory)
-    // {
-    //     // Initialize empty array.
-    //     Tournament[] memory _tournaments = new Tournament[](
-    //         tournamentsByAdmin[_sender].length
-    //     );
+    /**
+     * Return all the tournaments stored in the contract.
+     */
+    function getAllTournaments()
+        public
+        view
+        returns (TournamentPayload[] memory)
+    {
+        // Initialize empty array.
+        TournamentPayload[] memory _tournaments = new TournamentPayload[](
+            tournamentId
+        );
 
-    //     // Assign structs to array.
-    //     for (uint32 i = 0; i < tournamentsByAdmin[_sender].length; i++) {
-    //         uint32 _tournamentId = tournamentsByAdmin[_sender][
-    //             tournamentsByAdmin[_sender].length - i - 1
-    //         ];
-    //         _tournaments[i] = tournaments[_tournamentId];
-    //     }
+        // Assign structs to array.
+        for (uint32 i = 0; i < tournamentId; i++) {
+            _tournaments[i] = getTournament(
+                tournaments[tournamentId - i - 1].id
+            );
+        }
 
-    //     return _tournaments;
-    // }
-
-    // /**
-    //  * Return all the tournaments where the account is a participant.
-    //  */
-    // function getTournamentsByParticipant(address _sender)
-    //     public
-    //     view
-    //     returns (Tournament[] memory)
-    // {
-    //     // Initialize empty array.
-    //     Tournament[] memory _tournaments = new Tournament[](
-    //         tournamentsByParticipant[_sender].length
-    //     );
-
-    //     // Assign structs to array.
-    //     for (uint32 i = 0; i < tournamentsByParticipant[_sender].length; i++) {
-    //         uint32 _tournamentId = tournamentsByParticipant[_sender][
-    //             tournamentsByParticipant[_sender].length - i - 1
-    //         ];
-    //         _tournaments[i] = tournaments[_tournamentId];
-    //     }
-
-    //     return _tournaments;
-    // }
-
-    // /**
-    //  * Return all the tournaments stored in the contract.
-    //  */
-    // function getAllTournaments() public view returns (Tournament[] memory) {
-    //     // Initialize empty array.
-    //     Tournament[] memory _tournaments = new Tournament[](tournamentId);
-
-    //     // Assign structs to array.
-    //     for (uint32 i = 0; i < tournamentId; i++) {
-    //         _tournaments[i] = tournaments[tournamentId - i - 1];
-    //     }
-
-    //     return _tournaments;
-    // }
+        return _tournaments;
+    }
 }
