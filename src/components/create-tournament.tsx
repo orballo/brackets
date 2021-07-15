@@ -38,6 +38,11 @@ const CreateTournament: Component = () => {
     min-width: 150px;
   `;
 
+  const inputStyles = css`
+    max-width: 150px;
+    padding: 4px;
+  `;
+
   const buttonStyles = css`
     background-color: #333;
     color: #fff;
@@ -76,9 +81,9 @@ const CreateTournament: Component = () => {
         </select>
       </label>
       <label class={labelStyles}>
-        <span class={spanStyles}>Registration method:</span>
+        <span class={spanStyles}>Prize payer:</span>
         <select
-          name="registerMethod"
+          name="prizePayer"
           class={selectStyles}
           onChange={(event: any) =>
             actions.updateCreateTournamentField(
@@ -87,8 +92,44 @@ const CreateTournament: Component = () => {
             )
           }
         >
-          <option value="direct" label="Direct" />
-          <option value="invitation" label="Invitation" />
+          <option value="admin" label="Admin" />
+          <option value="participants" label="Participants" />
+        </select>
+      </label>
+      <label class={labelStyles}>
+        <span class={spanStyles}>Prize quantity:</span>
+        <input type="number" class={inputStyles} />
+      </label>
+      <label class={labelStyles}>
+        <span class={spanStyles}>Updates method:</span>
+        <select
+          name="updatesMethod"
+          class={selectStyles}
+          onChange={(event: any) =>
+            actions.updateCreateTournamentField(
+              event.target.name,
+              event.target.value
+            )
+          }
+        >
+          <option value="admin" label="Admin" />
+          <option value="participants" label="Participants" />
+        </select>
+      </label>
+      <label class={labelStyles}>
+        <span class={spanStyles}>Conflict resolution:</span>
+        <select
+          name="conflictResolution"
+          class={selectStyles}
+          onChange={(event: any) =>
+            actions.updateCreateTournamentField(
+              event.target.name,
+              event.target.value
+            )
+          }
+        >
+          <option value="admin" label="Admin" />
+          <option value="participants" label="Participants" />
         </select>
       </label>
       <button

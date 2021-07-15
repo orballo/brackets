@@ -267,11 +267,11 @@ contract Brackets is Ownable {
         view
         returns (TournamentPayload[] memory)
     {
-        // Check that the account has tournaments.
-        require(
-            accountToTournaments[_account].length > 0,
-            "The account doesn't have any tournaments."
-        );
+        // // Check that the account has tournaments.
+        // require(
+        //     accountToTournaments[_account].length > 0,
+        //     "The account doesn't have any tournaments."
+        // );
 
         // Initialize empty arrays.
         TournamentPayload[] memory _tournaments = new TournamentPayload[](

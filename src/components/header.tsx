@@ -8,17 +8,20 @@ const Header: Component = () => {
 
   const headerStyles = css`
     position: absolute;
+    top: 0;
     height: 52px;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 8px;
+    background-color: #fff;
+    border-bottom: 4px solid #0a1931;
   `;
 
   const titleStyles = css`
     margin: 0;
-    color: #fff;
+    color: #0a1931;
   `;
 
   return (

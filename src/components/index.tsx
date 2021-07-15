@@ -1,6 +1,6 @@
 import { Component, onMount } from "solid-js";
 import { useStore } from "../store";
-import Header from "./header";
+import Menu from "./menu";
 import Main from "./main";
 
 const App: Component = () => {
@@ -12,7 +12,7 @@ const App: Component = () => {
 
   return (
     <>
-      <Header />
+      <Menu />
       <Main />
     </>
   );

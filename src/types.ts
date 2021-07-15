@@ -7,26 +7,27 @@ export interface State {
   contractAddress: string;
   createTournament: {
     numberOfPlayers: number;
-    registerMethod: string;
+    prizePayer: "admin" | "participants";
+    prizeQuantity: number;
+    updatesMethod: "admin" | "participants";
+    conflictResolution: "admin" | "participants";
     isSubmitting: boolean;
   };
   tournaments: {
-    all: Tournament[];
-    admin: TournamentPayload[];
-    participant: TournamentPayload[];
+    list: Tournament[];
     currentId: string;
     currentTournament?: Tournament;
   };
+  route: "create" | "list" | "invitation";
 }
 
-export interface TournamentPayload {
+export interface Tournament {
   id: number;
+  code: string;
   numberOfPlayers: number;
-  registerMethod: string;
   status: string;
-}
-
-export interface Tournament extends TournamentPayload {
-  admin?: boolean;
-  participant?: boolean;
+  admin: string;
+  participants: string[];
+  isAdmin: boolean;
+  isParticipant: boolean;
 }

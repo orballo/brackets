@@ -13,18 +13,19 @@ const Main: Component = () => {
     justify-content: center;
     align-items: flex-start;
     height: 100%;
+    width: 100%;
     flex-direction: row;
     padding-top: 120px;
   `;
 
   return (
     <main class={mainStyles}>
-      <Show when={state.isConnected && !state.tournaments.currentId}>
+      {/* <Show when={state.isConnected && !state.tournaments.currentId}>
         <CreateTournament />
       </Show>
       <Show when={state.isConnected}>
         <TournamentList />
-      </Show>
+      </Show>*/}
       <Show when={!state.isConnected && state.isSynced}>
         <ButtonConnect />
       </Show>

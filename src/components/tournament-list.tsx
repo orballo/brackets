@@ -10,12 +10,8 @@ const TournamentList: Component = () => {
     list-style: none;
     margin: 0;
     padding: 0;
-    margin-left: 12px;
-    width: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    height: 100%;
+    overflow: auto;
   `;
 
   return (
@@ -23,7 +19,7 @@ const TournamentList: Component = () => {
       <For
         each={
           !state.tournaments.currentId
-            ? state.tournaments.all
+            ? state.tournaments.list
             : state.tournaments.currentTournament
             ? [state.tournaments.currentTournament]
             : []

@@ -2,49 +2,37 @@ import { createStore } from "solid-js/store";
 import { createContext, onMount, useContext } from "solid-js";
 import { ethers } from "ethers";
 import detectProvider from "@metamask/detect-provider";
-import { State, TournamentPayload } from "./types";
+import { State, Tournament } from "./types";
 import { encrypt, decrypt } from "./utils";
 
 import Brackets from "../artifacts/contracts/Brackets.sol/Brackets.json";
 
 const initialState: State = {
-  isConnected: false,
+  get isConnected() {
+    return !!this.user;
+  },
   isSynced: false,
   user: "",
   ethereum: null,
   provider: null,
-  contractAddress: "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+  contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   createTournament: {
     numberOfPlayers: 2,
-    registerMethod: "direct",
+    prizePayer: "admin",
+    prizeQuantity: 0,
+    updatesMethod: "admin",
+    conflictResolution: "admin",
     isSubmitting: false,
   },
   tournaments: {
-    get all() {
-      const { admin, participant } = this as State["tournaments"];
-
-      const all = admin.concat(participant).reduce((final, current) => {
-        const index = final.findIndex((t) => t.id === current.id);
-
-        if (index >= 0) {
-          Object.assign(final[index], current);
-        } else {
-          final.push({ ...current });
-        }
-
-        return final;
-      }, []);
-
-      return all;
-    },
-    admin: [],
-    participant: [],
+    list: [],
     get currentId() {
       const matches = window.location.pathname.match(/\/t\/([\w\d]*)\/?/);
       const id = matches ? decrypt(matches[1]) : null;
       return id;
     },
   },
+  route: "list",
 };
 
 const [state, setState] = createStore(initialState);
@@ -65,12 +53,8 @@ const actions = {
         setState("user", ethereum.selectedAddress);
         const provider = new ethers.providers.Web3Provider(state.ethereum);
         setState("provider", provider);
-        await Promise.all([
-          actions.getAdminTournaments(),
-          actions.getParticipantTournaments(),
-        ]);
-        if (state.tournaments.currentId) actions.getTournament();
-        setState("isConnected", true);
+        await actions.getTournaments();
+        if (state.tournaments.currentId) await actions.getTournament();
       }
 
       ethereum.on("accountsChanged", async ([address]: string[]) => {
@@ -78,14 +62,9 @@ const actions = {
 
         if (address) {
           const provider = new ethers.providers.Web3Provider(state.ethereum);
-          await Promise.all([
-            actions.getAdminTournaments(),
-            actions.getParticipantTournaments(),
-          ]);
-          if (state.tournaments.currentId) actions.getTournament();
           setState("provider", provider);
-        } else {
-          setState("isConnected", false);
+          await actions.getTournaments();
+          if (state.tournaments.currentId) await actions.getTournament();
         }
       });
 
@@ -101,7 +80,6 @@ const actions = {
       setState("user", address);
       const provider = new ethers.providers.Web3Provider(state.ethereum);
       setState("provider", provider);
-      setState("isConnected", true);
     }
   },
   getTournament: async () => {
@@ -113,60 +91,24 @@ const actions = {
 
     const response = await contract.getTournament(state.tournaments.currentId);
 
-    const tournament = {
-      id: response.id,
-      code: encrypt(response.id.toString()),
-      numberOfPlayers: response.numberOfPlayers,
-      registerMethod: response.registerMethod,
-      status: response.status,
-      admin: true,
-    };
+    const tournament = actions.mapTournament(response);
 
     setState("tournaments", "currentTournament", tournament);
   },
-  getAdminTournaments: async () => {
+  getTournaments: async () => {
     const contract = new ethers.Contract(
       state.contractAddress,
       Brackets.abi,
       state.provider
     );
 
-    const response = await contract.getTournamentsByAdmin(
+    const response = await contract.getTournaments(
       state.ethereum.selectedAddress
     );
 
-    const tournaments = response.map((item: TournamentPayload) => ({
-      id: item.id,
-      code: encrypt(item.id.toString()),
-      numberOfPlayers: item.numberOfPlayers,
-      registerMethod: item.registerMethod,
-      status: item.status,
-      admin: true,
-    }));
+    const tournaments = response.map(actions.mapTournament);
 
-    setState("tournaments", "admin", tournaments);
-  },
-  getParticipantTournaments: async () => {
-    const contract = new ethers.Contract(
-      state.contractAddress,
-      Brackets.abi,
-      state.provider
-    );
-
-    const response = await contract.getTournamentsByParticipant(
-      state.ethereum.selectedAddress
-    );
-
-    const tournaments = response.map((item: TournamentPayload) => ({
-      id: item.id,
-      code: encrypt(item.id.toString()),
-      numberOfPlayers: item.numberOfPlayers,
-      registerMethod: item.registerMethod,
-      status: item.status,
-      participant: true,
-    }));
-
-    setState("tournaments", "participant", tournaments);
+    setState("tournaments", "list", tournaments);
   },
   createTournament: async () => {
     setState("createTournament", "isSubmitting", true);
@@ -184,8 +126,7 @@ const actions = {
       });
       await state.provider.waitForTransaction(transaction.hash);
 
-      actions.getAdminTournaments();
-      actions.getParticipantTournaments();
+      await actions.getTournaments();
     } catch (error) {
       console.error(error);
     }
@@ -204,8 +145,7 @@ const actions = {
       const transaction = await contract.registerParticipant(id);
       await state.provider.waitForTransaction(transaction.hash);
 
-      actions.getAdminTournaments();
-      actions.getParticipantTournaments();
+      await actions.getTournaments();
     } catch (error) {
       console.error(error);
     }
@@ -222,8 +162,7 @@ const actions = {
       const transaction = await contract.unregisterParticipant(id);
       await state.provider.waitForTransaction(transaction.hash);
 
-      actions.getAdminTournaments();
-      actions.getParticipantTournaments();
+      await actions.getTournaments();
     } catch (error) {
       console.error(error);
     }
@@ -232,6 +171,26 @@ const actions = {
     if (name === "numberOfPlayers") value = parseInt(value);
 
     setState("createTournament", name, value);
+  },
+  mapTournament: (data: any) => {
+    return {
+      id: data.id,
+      code: encrypt(data.id.toString()),
+      numberOfPlayers: data.numberOfPlayers,
+      status: data.status,
+      admin: data.admin,
+      participants: data.participants.filter(
+        (participant: string) =>
+          participant !== "0x0000000000000000000000000000000000000000"
+      ),
+      isAdmin: data.admin.toUpperCase() === state.user.toUpperCase(),
+      isParticipant: !!data.participants.find(
+        (p: string) => p.toUpperCase() === state.user.toUpperCase()
+      ),
+    };
+  },
+  updateRoute: (value: State["route"]) => {
+    setState("route", value);
   },
 };
 
