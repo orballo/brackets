@@ -7,12 +7,16 @@ import "hardhat/console.sol";
 struct Tournament {
     uint32 id;
     uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
+    string reports;
+    string conflicts;
     string status; // "created" | "started" | "finished" | "canceled"
 }
 
 struct TournamentPayload {
     uint32 id;
     uint8 numberOfPlayers;
+    string reports;
+    string conflicts;
     string status;
     address admin;
     address[] participants;
@@ -20,6 +24,8 @@ struct TournamentPayload {
 
 struct TournamentOptions {
     uint8 numberOfPlayers;
+    string reports; // "admin" | "participants"
+    string conflicts; // "admin" | "participants"
 }
 
 struct Bracket {
@@ -48,18 +54,16 @@ contract Brackets is Ownable {
 
     // Modifiers.
 
-    // modifier onlyAdmin(uint32 _tournamentId) {
-    //     bool isAdmin = false;
+    modifier onlyAdmin(uint32 _tournamentId) {
+        bool isAdmin = false;
 
-    //     for (uint32 i = 0; i < tournamentsByAdmin[msg.sender].length; i++) {
-    //         if (tournamentsByAdmin[msg.sender][i] == _tournamentId) {
-    //             isAdmin = true;
-    //         }
-    //     }
+        if (tournamentToBrackets[_tournamentId][0].participant == msg.sender) {
+            isAdmin = true;
+        }
 
-    //     require(isAdmin, "The account is not the admin of this tournament.");
-    //     _;
-    // }
+        require(isAdmin, "The account is not the admin of this tournament.");
+        _;
+    }
 
     modifier validateOptions(TournamentOptions memory _options) {
         // Validate `numberOfPlayers` option.
@@ -93,6 +97,8 @@ contract Brackets is Ownable {
         Tournament memory _tournament;
         _tournament.id = tournamentId;
         _tournament.numberOfPlayers = _options.numberOfPlayers;
+        _tournament.reports = _options.reports;
+        _tournament.conflicts = _options.conflicts;
         _tournament.status = "created";
 
         // Save the tournament and its relationships.
@@ -110,10 +116,15 @@ contract Brackets is Ownable {
     // /**
     //  * Update a tournament.
     //  */
-    // function updateTournament(
-    //     uint32 _tournamentId,
-    //     TournamentOptions memory _options
-    // ) public onlyAdmin(_tournamentId) {}
+    function updateTournament(
+        uint32 _tournamentId,
+        TournamentOptions memory _options
+    ) public onlyAdmin(_tournamentId) validateOptions(_options) {
+        // Update the tournament.
+        tournaments[_tournamentId].numberOfPlayers = _options.numberOfPlayers;
+        tournaments[_tournamentId].reports = _options.reports;
+        tournaments[_tournamentId].conflicts = _options.conflicts;
+    }
 
     /**
      * Register a participant for a tournament.
@@ -255,6 +266,8 @@ contract Brackets is Ownable {
         TournamentPayload memory _tournament;
         _tournament.id = tournaments[_id].id;
         _tournament.numberOfPlayers = tournaments[_id].numberOfPlayers;
+        _tournament.reports = tournaments[_id].reports;
+        _tournament.conflicts = tournaments[_id].conflicts;
         _tournament.status = tournaments[_id].status;
         _tournament.admin = tournamentToBrackets[_id][0].participant;
         _tournament.participants = new address[](

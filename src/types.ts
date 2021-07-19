@@ -9,8 +9,8 @@ export interface State {
     numberOfPlayers: number;
     prizePayer: "admin" | "participants";
     prizeQuantity: number;
-    updatesMethod: "admin" | "participants";
-    conflictResolution: "admin" | "participants";
+    reports: "admin" | "participants";
+    conflicts: "admin" | "participants";
     isSubmitting: boolean;
   };
   tournaments: {

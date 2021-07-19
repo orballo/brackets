@@ -103,7 +103,7 @@ const CreateTournament: Component = () => {
       <label class={labelStyles}>
         <span class={spanStyles}>Updates method:</span>
         <select
-          name="updatesMethod"
+          name="reports"
           class={selectStyles}
           onChange={(event: any) =>
             actions.updateCreateTournamentField(
@@ -119,7 +119,7 @@ const CreateTournament: Component = () => {
       <label class={labelStyles}>
         <span class={spanStyles}>Conflict resolution:</span>
         <select
-          name="conflictResolution"
+          name="conflicts"
           class={selectStyles}
           onChange={(event: any) =>
             actions.updateCreateTournamentField(

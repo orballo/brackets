@@ -20,8 +20,8 @@ const initialState: State = {
     numberOfPlayers: 2,
     prizePayer: "admin",
     prizeQuantity: 0,
-    updatesMethod: "admin",
-    conflictResolution: "admin",
+    reports: "admin",
+    conflicts: "admin",
     isSubmitting: false,
   },
   tournaments: {
@@ -122,7 +122,6 @@ const actions = {
     try {
       const transaction = await contract.createTournament({
         numberOfPlayers: state.createTournament.numberOfPlayers,
-        registerMethod: state.createTournament.registerMethod,
       });
       await state.provider.waitForTransaction(transaction.hash);
 

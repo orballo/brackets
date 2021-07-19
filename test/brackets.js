@@ -27,12 +27,18 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let tournaments = await brackets.getTournaments(owner.address);
@@ -48,18 +54,28 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.createTournament({
         numberOfPlayers: 4,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.createTournament({
         numberOfPlayers: 8,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.createTournament({
         numberOfPlayers: 16,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.createTournament({
         numberOfPlayers: 32,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let tournaments = await brackets.getTournaments(owner.address);
@@ -76,6 +92,8 @@ describe("Brackets", async () => {
       try {
         await brackets.createTournament({
           numberOfPlayers: 3,
+          reports: "admin",
+          conflicts: "admin",
         });
       } catch (error) {
         expect(error.message).to.include(
@@ -89,17 +107,52 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
-      tournaments = await brackets.getTournaments(owner.address);
+      let tournaments = await brackets.getTournaments(owner.address);
 
       expect(tournaments.length).to.equal(1);
       expect(tournaments[0].status).to.equal("created");
     });
+
+    it(
+      "Should create tournaments with all the possible options for `reports`."
+    );
+    it("Should fail if `reports` is not a valid value.");
+    it(
+      "Should create tournaments with all the possible options for `conflicts`."
+    );
+    it("Should fail if `conflicts` is not a valid value.");
   });
 
   describe("updateTournament", () => {
-    it("Should update the tournament withe the new options.");
+    it("Should update the tournament with the new options.", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
+      });
+
+      let tournament = await brackets.getTournament(0);
+
+      expect(tournament.numberOfPlayers).to.equal(2);
+      expect(tournament.reports).to.equal("admin");
+      expect(tournament.conflicts).to.equal("admin");
+
+      await brackets.updateTournament(0, {
+        numberOfPlayers: 4,
+        reports: "participants",
+        conflicts: "participants",
+      });
+
+      tournament = await brackets.getTournament(0);
+
+      expect(tournament.numberOfPlayers).to.equal(4);
+      expect(tournament.reports).to.equal("participants");
+      expect(tournament.conflicts).to.equal("participants");
+    });
     it("Should fail if any value of the options is not valid.");
     it("Should fail if the user is not the admin of the tournament.");
   });
@@ -110,6 +163,8 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       await brackets.registerParticipant(0);
@@ -124,6 +179,8 @@ describe("Brackets", async () => {
     it("Should fail if the account is already registered for the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       await brackets.registerParticipant(0);
@@ -147,6 +204,8 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       await brackets.connect(owner).registerParticipant(0);
@@ -169,6 +228,8 @@ describe("Brackets", async () => {
     it("Should fail if the tournament doesn't exist", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let error;
@@ -190,6 +251,8 @@ describe("Brackets", async () => {
 
       brackets.createTournament({
         numberOfPlayers: 4,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       await brackets.connect(owner).registerParticipant(0);
@@ -226,6 +289,8 @@ describe("Brackets", async () => {
     it("Should fail if the tournament id is invalid.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 4,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let error;
@@ -243,6 +308,8 @@ describe("Brackets", async () => {
     it("Should fail if the account is not registered for the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 4,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let error;
@@ -266,7 +333,11 @@ describe("Brackets", async () => {
     it("Should return a tournament by id", async () => {
       const [owner, one, two] = await ethers.getSigners();
 
-      await brackets.createTournament({ numberOfPlayers: 2 });
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
+      });
 
       await brackets.connect(one).registerParticipant(0);
       await brackets.connect(two).registerParticipant(0);
@@ -285,7 +356,8 @@ describe("Brackets", async () => {
     it("Should fail if the tournament id is invalid.", async () => {
       brackets.createTournament({
         numberOfPlayers: 2,
-        registerMethod: "direct",
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let error;
@@ -307,12 +379,18 @@ describe("Brackets", async () => {
 
       await brackets.connect(owner).createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.connect(one).createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
       await brackets.connect(two).createTournament({
         numberOfPlayers: 2,
+        reports: "admin",
+        conflicts: "admin",
       });
 
       await brackets.connect(owner).registerParticipant(1);
@@ -340,15 +418,18 @@ describe("Brackets", async () => {
 
       brackets.connect(owner).createTournament({
         numberOfPlayers: 2,
-        registerMethod: "direct",
+        reports: "admin",
+        conflicts: "admin",
       });
       brackets.connect(addressOne).createTournament({
         numberOfPlayers: 2,
-        registerMethod: "direct",
+        reports: "admin",
+        conflicts: "admin",
       });
       brackets.connect(addressTwo).createTournament({
         numberOfPlayers: 2,
-        registerMethod: "direct",
+        reports: "admin",
+        conflicts: "admin",
       });
 
       let tournaments = await brackets.connect(owner).getAllTournaments();
