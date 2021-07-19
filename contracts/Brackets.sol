@@ -22,6 +22,11 @@ struct TournamentOptions {
     uint8 numberOfPlayers;
 }
 
+struct Bracket {
+    address participant;
+    string result; // "none" | "win" | "lose"
+}
+
 contract Brackets is Ownable {
     constructor() {
         tournamentId = 0;
@@ -37,9 +42,9 @@ contract Brackets is Ownable {
     mapping(address => uint32[]) accountToTournaments;
 
     // Asignment of the accounts in the brackets.
-    // The index 0 is reserver for the admin.
-    // From 1 to 32 are used for the brackets.
-    mapping(uint32 => mapping(uint8 => address)) tournamentToBrackets;
+    // The index 0 is reserved for the admin.
+    // From 1 to 63 are used for the brackets.
+    mapping(uint32 => mapping(uint8 => Bracket)) tournamentToBrackets;
 
     // Modifiers.
 
@@ -93,7 +98,10 @@ contract Brackets is Ownable {
         // Save the tournament and its relationships.
         tournaments[_tournament.id] = _tournament;
         accountToTournaments[msg.sender].push(_tournament.id);
-        tournamentToBrackets[_tournament.id][0] = msg.sender;
+        tournamentToBrackets[_tournament.id][0] = Bracket({
+            participant: msg.sender,
+            result: "none"
+        });
 
         // Increase the tournament id.
         tournamentId += 1;
@@ -132,13 +140,16 @@ contract Brackets is Ownable {
         ) {
             // Check that the account is not already registered.
             require(
-                tournamentToBrackets[_tournamentId][i] != msg.sender,
+                tournamentToBrackets[_tournamentId][i].participant !=
+                    msg.sender,
                 "The account is already registered for this tournament."
             );
 
             // If there is an empty space, register the account.
-            if (tournamentToBrackets[_tournamentId][i] == address(0)) {
-                tournamentToBrackets[_tournamentId][i] = msg.sender;
+            if (
+                tournamentToBrackets[_tournamentId][i].participant == address(0)
+            ) {
+                tournamentToBrackets[_tournamentId][i].participant = msg.sender;
                 hasRegistered = true;
                 break;
             }
@@ -170,7 +181,8 @@ contract Brackets is Ownable {
         validateTournamentId(_tournamentId)
     {
         bool removedFromBrackets = false;
-        bool isAdmin = tournamentToBrackets[_tournamentId][0] == msg.sender;
+        bool isAdmin = tournamentToBrackets[_tournamentId][0].participant ==
+            msg.sender;
 
         // Get the number of iterations we need
         // to explore the mapping.
@@ -183,7 +195,7 @@ contract Brackets is Ownable {
             // in the brackets.
             if (
                 removedFromBrackets ||
-                tournamentToBrackets[_tournamentId][i] == msg.sender
+                tournamentToBrackets[_tournamentId][i].participant == msg.sender
             ) {
                 tournamentToBrackets[_tournamentId][i] = tournamentToBrackets[
                     _tournamentId
@@ -244,15 +256,16 @@ contract Brackets is Ownable {
         _tournament.id = tournaments[_id].id;
         _tournament.numberOfPlayers = tournaments[_id].numberOfPlayers;
         _tournament.status = tournaments[_id].status;
-        _tournament.admin = tournamentToBrackets[_id][0];
+        _tournament.admin = tournamentToBrackets[_id][0].participant;
         _tournament.participants = new address[](
             tournaments[_id].numberOfPlayers
         );
 
         // Populate the participants of the tournament.
         for (uint8 i = 1; i <= _tournament.participants.length; i++) {
-            if (tournamentToBrackets[_id][i] != address(0)) {
-                _tournament.participants[i - 1] = tournamentToBrackets[_id][i];
+            if (tournamentToBrackets[_id][i].participant != address(0)) {
+                _tournament.participants[i - 1] = tournamentToBrackets[_id][i]
+                .participant;
             }
         }
 

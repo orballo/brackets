@@ -6,6 +6,8 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
+    "node": "npx hardhat node",
+    "test": "npx hardhat watch tests",
     "deploy": "hardhat --network localhost run scripts/deploy.js"
   },
   "license": "MIT",

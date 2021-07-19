@@ -21,8 +21,9 @@ module.exports = {
     },
   },
   watcher: {
-    test: {
+    tests: {
       tasks: ["test"],
+      files: ["./test/**/*", "./contracts/**/*"],
     },
   },
   gasReporter: {
