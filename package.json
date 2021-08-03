@@ -3,9 +3,11 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
+    "start": "sirv public --no-clear",
+    "dev": "rollup -c -w",
+    "build": "rollup -c",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "compile": "npx hardhat compile",
     "node": "npx hardhat node",
     "test": "npx hardhat watch tests",
     "deploy": "hardhat --network localhost run scripts/deploy.js"
@@ -14,23 +16,35 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-typescript": "^8.0.0",
+    "@tsconfig/svelte": "^2.0.0",
     "@types/crypto-js": "^4.0.2",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "hardhat": "^2.4.1",
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-watcher": "^2.1.1",
-    "vite": "^2.3.8",
-    "vite-plugin-solid": "^2.0.0"
+    "rollup": "^2.3.4",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "svelte": "^3.0.0",
+    "svelte-check": "^2.0.0",
+    "svelte-preprocess": "^4.0.0",
+    "svelte-spa-router": "^3.2.0",
+    "tslib": "^2.0.0",
+    "typechain": "^5.1.2",
+    "typescript": "^4.0.0"
   },
   "dependencies": {
-    "@emotion/css": "^11.1.3",
     "@metamask/detect-provider": "^1.2.0",
     "@openzeppelin/contracts": "^4.2.0",
     "crypto-js": "^4.0.0",
     "ethers": "^5.4.1",
     "jazzicon": "^1.5.0",
-    "react-beautiful-dnd": "^13.1.0",
-    "solid-js": "^1.0.0"
+    "sirv-cli": "^1.0.0"
   }
 }
