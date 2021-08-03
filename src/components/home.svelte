@@ -3,8 +3,6 @@
   import Logo from "./logo.svelte";
   import ButtonConnect from "./button-connect.svelte";
   import ButtonDashboard from "./button-dashboard.svelte";
-
-  connection.detectProvider();
 </script>
 
 <header><Logo /></header>
@@ -30,11 +28,5 @@
     padding-top: 6em;
     max-width: 240px;
     margin: 0 auto;
-  }
-
-  @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
   }
 </style>
