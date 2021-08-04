@@ -7,6 +7,7 @@
 </script>
 
 <button
+  title="Copy link"
   class="share"
   disabled={copied}
   on:click={async () => {

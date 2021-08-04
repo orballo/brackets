@@ -1,8 +1,9 @@
 import { readable, get } from "svelte/store";
 import { ethers } from "ethers";
 import { push } from "svelte-spa-router";
-import { encrypt } from "../utils";
+import { encrypt, decrypt } from "../utils";
 import connection from "./connection";
+import tournament from "./tournament";
 import tournaments from "./tournaments";
 import newTournament from "./new-tournament";
 import Brackets from "../../artifacts/contracts/Brackets.sol/Brackets.json";
@@ -17,6 +18,14 @@ const createContract = () => {
     const list = response.map(mapTournament);
     tournaments.set(list);
     console.log("tournaments:", get(tournaments));
+  }
+
+  async function getTournament(code: string) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(get(address), Brackets.abi, provider);
+    const response = await contract.getTournament(decrypt(code));
+    const data = mapTournament(response);
+    tournament.set(data);
   }
 
   async function createTournament() {
@@ -44,6 +53,7 @@ const createContract = () => {
       const transaction = await contract.registerParticipant(id);
       await provider.waitForTransaction(transaction.hash);
       await getTournaments();
+      await getTournament(encrypt(id.toString()));
     } catch (error) {
       console.error(error);
     }
@@ -73,6 +83,7 @@ const createContract = () => {
   return {
     subscribe: address.subscribe,
     getTournaments,
+    getTournament,
     createTournament,
     registerParticipant,
   };

@@ -53,12 +53,18 @@
           </section>
         </article>
         <footer>
-          <button on:click={() => contract.registerParticipant(tournament.id)}
-            >Register as participant</button
-          >
-          <button>Edit tournament</button>
-          <button>Cancel tournament</button>
-          <button>Start tournament</button>
+          {#if !tournament.isParticipant}
+            <button
+              on:click={() => contract.registerParticipant(tournament.id)}
+            >
+              Register as participant
+            </button>
+          {/if}
+          {#if tournament.isAdmin}
+            <button>Edit tournament</button>
+            <button>Cancel tournament</button>
+            <button>Start tournament</button>
+          {/if}
         </footer>
       </li>
     {/each}
