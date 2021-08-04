@@ -1,9 +1,6 @@
 <script lang="ts">
   import { newTournament, contract } from "../stores";
   import Header from "./header.svelte";
-
-  let numberOfPlayers = [2, 4, 6, 16, 32];
-  let selected: number;
 </script>
 
 <Header />
@@ -13,7 +10,7 @@
     <label>
       <span>Number of players</span>
       <select bind:value={$newTournament.numberOfPlayers}>
-        {#each numberOfPlayers as option}
+        {#each [2, 4, 6, 16, 32] as option}
           <option value={option}>{option}</option>
         {/each}
       </select>
