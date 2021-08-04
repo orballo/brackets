@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { connection, contract } from "../stores";
   import Header from "./header.svelte";
 
@@ -12,5 +12,7 @@
   main {
     width: 100%;
     max-width: 1024px;
+    margin: 0 auto;
+    padding: 0 16px;
   }
 </style>

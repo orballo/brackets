@@ -7,16 +7,16 @@ import "hardhat/console.sol";
 struct Tournament {
     uint32 id;
     uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
-    string reports;
-    string conflicts;
+    uint32 initialPrize;
+    uint32 registrationFee;
     string status; // "created" | "started" | "finished" | "canceled"
 }
 
 struct TournamentPayload {
     uint32 id;
     uint8 numberOfPlayers;
-    string reports;
-    string conflicts;
+    uint32 initialPrize;
+    uint32 registrationFee;
     string status;
     address admin;
     address[] participants;
@@ -24,8 +24,8 @@ struct TournamentPayload {
 
 struct TournamentOptions {
     uint8 numberOfPlayers;
-    string reports; // "admin" | "participants"
-    string conflicts; // "admin" | "participants"
+    uint32 initialPrize;
+    uint32 registrationFee;
 }
 
 struct Bracket {
@@ -97,8 +97,8 @@ contract Brackets is Ownable {
         Tournament memory _tournament;
         _tournament.id = tournamentId;
         _tournament.numberOfPlayers = _options.numberOfPlayers;
-        _tournament.reports = _options.reports;
-        _tournament.conflicts = _options.conflicts;
+        _tournament.initialPrize = _options.initialPrize;
+        _tournament.registrationFee = _options.registrationFee;
         _tournament.status = "created";
 
         // Save the tournament and its relationships.
@@ -122,8 +122,8 @@ contract Brackets is Ownable {
     ) public onlyAdmin(_tournamentId) validateOptions(_options) {
         // Update the tournament.
         tournaments[_tournamentId].numberOfPlayers = _options.numberOfPlayers;
-        tournaments[_tournamentId].reports = _options.reports;
-        tournaments[_tournamentId].conflicts = _options.conflicts;
+        tournaments[_tournamentId].initialPrize = _options.initialPrize;
+        tournaments[_tournamentId].registrationFee = _options.registrationFee;
     }
 
     /**
@@ -266,8 +266,8 @@ contract Brackets is Ownable {
         TournamentPayload memory _tournament;
         _tournament.id = tournaments[_id].id;
         _tournament.numberOfPlayers = tournaments[_id].numberOfPlayers;
-        _tournament.reports = tournaments[_id].reports;
-        _tournament.conflicts = tournaments[_id].conflicts;
+        _tournament.initialPrize = tournaments[_id].initialPrize;
+        _tournament.registrationFee = tournaments[_id].registrationFee;
         _tournament.status = tournaments[_id].status;
         _tournament.admin = tournamentToBrackets[_id][0].participant;
         _tournament.participants = new address[](
@@ -278,7 +278,7 @@ contract Brackets is Ownable {
         for (uint8 i = 1; i <= _tournament.participants.length; i++) {
             if (tournamentToBrackets[_id][i].participant != address(0)) {
                 _tournament.participants[i - 1] = tournamentToBrackets[_id][i]
-                .participant;
+                    .participant;
             }
         }
 
