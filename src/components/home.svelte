@@ -23,10 +23,20 @@
     background-color: #fff;
   }
 
+  header > :global(svg) {
+    width: auto;
+    height: 52px;
+  }
+
   main {
-    text-align: center;
     padding-top: 6em;
-    max-width: 240px;
-    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    header > :global(svg) {
+      height: auto;
+    }
   }
 </style>
