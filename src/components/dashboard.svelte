@@ -52,6 +52,7 @@
         </article>
         <footer>
           <button>Register as participant</button>
+          <button>Update torunament</button>
           <button>Cancel tournament</button>
           <button>Start tournament</button>
         </footer>
@@ -130,5 +131,25 @@
   .user :global(div) {
     margin-left: -6px;
     margin-top: -2px;
+  }
+
+  footer {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 16px;
+  }
+
+  button {
+    border: 2px solid #333;
+    background-color: #eee;
+    font-size: 14px;
+    text-transform: uppercase;
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    box-shadow: 0 0 2px 0px #333;
   }
 </style>

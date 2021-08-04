@@ -9,6 +9,9 @@
       <a href="/"><Logo /></a>
     </div>
     <div class="right">
+      <a class="new-tournament" href="#/new"
+        ><span>+</span><span>New tournament</span></a
+      >
       <a href="#/dashboard">
         <UserIcon />
       </a>
@@ -52,5 +55,26 @@
 
   .right {
     margin-left: auto;
+  }
+
+  .new-tournament {
+    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: bolder;
+    margin-right: 32px;
+  }
+
+  .new-tournament span:first-of-type {
+    margin-bottom: 2px;
+    font-size: 40px;
+    line-height: 40px;
+    font-weight: lighter;
+    margin-right: 4px;
+  }
+
+  @media (max-width: 767px) {
+    .new-tournament span:last-of-type {
+      display: none;
+    }
   }
 </style>

@@ -76,14 +76,14 @@
     outline: none;
   }
   button {
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
     border: 2px solid #333;
-    background-color: #fff;
+    background-color: #eee;
     cursor: pointer;
     display: block;
-    width: 120px;
-    height: 40px;
+    width: 160px;
+    padding: 8px;
     margin-left: auto;
   }
 
