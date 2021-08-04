@@ -2,6 +2,7 @@
   import { connection, contract, tournaments } from "../stores";
   import Header from "./header.svelte";
   import UserIcon from "./user-icon.svelte";
+  import ButtonShare from "./button-share.svelte";
   import Address from "./address.svelte";
 
   $: $connection.isConnected && contract.getTournaments();
@@ -16,6 +17,7 @@
         <header>
           <span>ID</span>
           {tournament.id}
+          <ButtonShare code={tournament.code} />
         </header>
         <article>
           <section>
@@ -51,8 +53,10 @@
           </section>
         </article>
         <footer>
-          <button>Register as participant</button>
-          <button>Update torunament</button>
+          <button on:click={() => contract.registerParticipant(tournament.id)}
+            >Register as participant</button
+          >
+          <button>Edit tournament</button>
           <button>Cancel tournament</button>
           <button>Start tournament</button>
         </footer>
@@ -95,10 +99,14 @@
     font-size: 20px;
     text-align: right;
     margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 
   li header span {
     font-weight: bold;
+    margin-right: 8px;
   }
 
   article {
@@ -114,6 +122,10 @@
   }
 
   section .admin {
+    display: block;
+  }
+
+  section .participants {
     display: block;
   }
 

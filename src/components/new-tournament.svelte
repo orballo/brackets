@@ -10,7 +10,7 @@
     <label>
       <span>Number of players</span>
       <select bind:value={$newTournament.numberOfPlayers}>
-        {#each [2, 4, 6, 16, 32] as option}
+        {#each [2, 4, 8, 16, 32] as option}
           <option value={option}>{option}</option>
         {/each}
       </select>

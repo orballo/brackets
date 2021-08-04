@@ -1,5 +1,6 @@
 import { readable, get } from "svelte/store";
 import { ethers } from "ethers";
+import { push } from "svelte-spa-router";
 import { encrypt } from "../utils";
 import connection from "./connection";
 import tournaments from "./tournaments";
@@ -28,6 +29,21 @@ const createContract = () => {
       const transaction = await contract.createTournament(payload);
       await provider.waitForTransaction(transaction.hash);
       await getTournaments();
+      push("/dashboard");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function registerParticipant(id: number) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(get(address), Brackets.abi, signer);
+
+    try {
+      const transaction = await contract.registerParticipant(id);
+      await provider.waitForTransaction(transaction.hash);
+      await getTournaments();
     } catch (error) {
       console.error(error);
     }
@@ -54,7 +70,12 @@ const createContract = () => {
     };
   }
 
-  return { subscribe: address.subscribe, getTournaments, createTournament };
+  return {
+    subscribe: address.subscribe,
+    getTournaments,
+    createTournament,
+    registerParticipant,
+  };
 };
 
 export default createContract();
