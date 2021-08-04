@@ -28,10 +28,6 @@
 </main>
 
 <style>
-  h2 {
-    text-transform: uppercase;
-  }
-
   main {
     width: 100%;
     max-width: 1024px;
@@ -42,6 +38,10 @@
     align-items: center;
   }
 
+  h2 {
+    margin-top: 40px;
+    text-transform: uppercase;
+  }
   form {
     background-color: #fff;
     color: #333;
@@ -71,10 +71,23 @@
     padding: 0 8px;
   }
 
+  select:focus,
+  input:focus {
+    outline: none;
+  }
   button {
+    font-size: 16px;
+    text-transform: uppercase;
+    border: 2px solid #333;
+    background-color: #fff;
+    cursor: pointer;
     display: block;
     width: 120px;
     height: 40px;
     margin-left: auto;
+  }
+
+  button:hover {
+    box-shadow: 0 0 2px 0px #333;
   }
 </style>
