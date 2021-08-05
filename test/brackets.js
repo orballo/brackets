@@ -277,14 +277,22 @@ describe("Brackets", async () => {
 
       brackets.createTournament({
         numberOfPlayers: 4,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
 
-      await brackets.connect(owner).registerParticipant(0);
-      await brackets.connect(one).registerParticipant(0);
-      await brackets.connect(two).registerParticipant(0);
-      await brackets.connect(three).registerParticipant(0);
+      await brackets
+        .connect(owner)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
+      await brackets
+        .connect(one)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
+      await brackets
+        .connect(two)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
+      await brackets
+        .connect(three)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
 
       let tournament = await brackets.getTournament(0);
 
@@ -361,12 +369,16 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
 
-      await brackets.connect(one).registerParticipant(0);
-      await brackets.connect(two).registerParticipant(0);
+      await brackets
+        .connect(one)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
+      await brackets
+        .connect(two)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
 
       let tournament = await brackets.getTournament(0);
 
@@ -405,22 +417,26 @@ describe("Brackets", async () => {
 
       await brackets.connect(owner).createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
       await brackets.connect(one).createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
       await brackets.connect(two).createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
 
-      await brackets.connect(owner).registerParticipant(1);
-      await brackets.connect(owner).registerParticipant(2);
+      await brackets
+        .connect(owner)
+        .registerParticipant(1, { value: ethers.utils.parseEther("1") });
+      await brackets
+        .connect(owner)
+        .registerParticipant(2, { value: ethers.utils.parseEther("1") });
 
       let tournaments = await brackets
         .connect(owner)
