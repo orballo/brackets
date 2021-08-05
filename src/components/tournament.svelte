@@ -57,13 +57,20 @@
         </section>
       </article>
       <footer>
+        <div />
         {#if !$tournament.isParticipant}
           <button on:click={() => contract.registerParticipant($tournament.id)}>
             Register as participant
           </button>
+        {:else}
+          <button
+            on:click={() => contract.unregisterParticipant($tournament.id)}
+          >
+            Unregister as participant
+          </button>
         {/if}
         {#if $tournament.isAdmin}
-          <button>Edit tournament</button>
+          <!-- <button>Edit tournament</button> -->
           <button>Cancel tournament</button>
           <button>Start tournament</button>
         {/if}
