@@ -1,5 +1,6 @@
 <script lang="ts">
   import { connection, tournament, contract } from "../stores";
+  import { decrypt } from "../utils";
   import Header from "./header.svelte";
   import ButtonShare from "./button-share.svelte";
   import UserIcon from "./user-icon.svelte";
@@ -7,7 +8,8 @@
 
   export let params: Record<string, any> = {};
 
-  $: $connection.isConnected && contract.getTournament(params.code);
+  $: $connection.isConnected &&
+    contract.getTournament(parseInt(decrypt(params.code)));
 </script>
 
 <Header />

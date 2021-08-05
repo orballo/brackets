@@ -59,6 +59,11 @@
             >
               Register as participant
             </button>
+          {:else}
+            <button
+              on:click={() => contract.unregisterParticipant(tournament.id)}
+              >Unregister as participant</button
+            >
           {/if}
           {#if tournament.isAdmin}
             <button>Edit tournament</button>

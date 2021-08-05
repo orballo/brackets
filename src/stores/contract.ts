@@ -17,15 +17,16 @@ const createContract = () => {
     const response = await contract.getTournaments(get(connection).address);
     const list = response.map(mapTournament);
     tournaments.set(list);
-    console.log("tournaments:", get(tournaments));
+    console.log("In getTournaments:", get(tournaments));
   }
 
-  async function getTournament(code: string) {
+  async function getTournament(id: number) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contract = new ethers.Contract(get(address), Brackets.abi, provider);
-    const response = await contract.getTournament(decrypt(code));
+    const response = await contract.getTournament(id);
     const data = mapTournament(response);
     tournament.set(data);
+    console.log("In getTournament:", get(tournament));
   }
 
   async function createTournament() {
@@ -37,7 +38,6 @@ const createContract = () => {
       const payload = get(newTournament);
       const transaction = await contract.createTournament(payload);
       await provider.waitForTransaction(transaction.hash);
-      await getTournaments();
       push("/dashboard");
     } catch (error) {
       console.error(error);
@@ -53,7 +53,22 @@ const createContract = () => {
       const transaction = await contract.registerParticipant(id);
       await provider.waitForTransaction(transaction.hash);
       await getTournaments();
-      await getTournament(encrypt(id.toString()));
+      await getTournament(id);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function unregisterParticipant(id: number) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(get(address), Brackets.abi, signer);
+
+    try {
+      const transaction = await contract.unregisterParticipant(id);
+      await provider.waitForTransaction(transaction.hash);
+      await getTournaments();
+      await getTournament(id);
     } catch (error) {
       console.error(error);
     }
@@ -86,6 +101,7 @@ const createContract = () => {
     getTournament,
     createTournament,
     registerParticipant,
+    unregisterParticipant,
   };
 };
 

@@ -6,7 +6,7 @@
 <Header />
 <main>
   <h2>Register a new tournament</h2>
-  <form>
+  <form on:submit|preventDefault={() => contract.createTournament()}>
     <label>
       <span>Number of players</span>
       <select bind:value={$newTournament.numberOfPlayers}>
@@ -23,7 +23,7 @@
       <span>Registration fee</span>
       <input type="number" bind:value={$newTournament.registrationFee} />
     </label>
-    <button on:click={contract.createTournament}>Register</button>
+    <button type="submit">Register</button>
   </form>
 </main>
 
