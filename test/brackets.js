@@ -156,12 +156,16 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
 
-      await brackets.registerParticipant(0);
-      await brackets.connect(one).registerParticipant(0);
+      await brackets.registerParticipant(0, {
+        value: ethers.utils.parseEther("1"),
+      });
+      await brackets
+        .connect(one)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
 
       let tournament = await brackets.getTournament(0);
 
@@ -169,11 +173,32 @@ describe("Brackets", async () => {
       expect(tournament.participants[1]).to.equal(one.address);
     });
 
+    it("Should fail if the account didn't send the fee.", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
+      });
+
+      let error;
+
+      try {
+        await brackets.registerParticipant(0);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include(
+        "The account didn't pay the right fee for the tournament."
+      );
+    });
+
     it("Should fail if the account is already registered for the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
         initialPrize: 1,
-        registrationFee: 1,
+        registrationFee: 0,
       });
 
       await brackets.registerParticipant(0);
@@ -197,17 +222,23 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
 
-      await brackets.connect(owner).registerParticipant(0);
-      await brackets.connect(one).registerParticipant(0);
+      await brackets
+        .connect(owner)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
+      await brackets
+        .connect(one)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
 
       let error;
 
       try {
-        await brackets.connect(two).registerParticipant(0);
+        await brackets
+          .connect(two)
+          .registerParticipant(0, { value: ethers.utils.parseEther("1") });
       } catch (e) {
         error = e;
       }
@@ -221,14 +252,16 @@ describe("Brackets", async () => {
     it("Should fail if the tournament doesn't exist", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
       });
 
       let error;
 
       try {
-        await brackets.registerParticipant(1);
+        await brackets.registerParticipant(1, {
+          value: ethers.utils.parseEther("1"),
+        });
       } catch (e) {
         error = e;
       }

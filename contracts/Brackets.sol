@@ -7,16 +7,16 @@ import "hardhat/console.sol";
 struct Tournament {
     uint32 id;
     uint8 numberOfPlayers; // 2 | 4 | 8 | 16 | 32
-    uint32 initialPrize;
-    uint32 registrationFee;
+    uint256 initialPrize;
+    uint256 registrationFee;
     string status; // "created" | "started" | "finished" | "canceled"
 }
 
 struct TournamentPayload {
     uint32 id;
     uint8 numberOfPlayers;
-    uint32 initialPrize;
-    uint32 registrationFee;
+    uint256 initialPrize;
+    uint256 registrationFee;
     string status;
     address admin;
     address[] participants;
@@ -24,8 +24,8 @@ struct TournamentPayload {
 
 struct TournamentOptions {
     uint8 numberOfPlayers;
-    uint32 initialPrize;
-    uint32 registrationFee;
+    uint256 initialPrize;
+    uint256 registrationFee;
 }
 
 struct Bracket {
@@ -131,6 +131,7 @@ contract Brackets is Ownable {
      */
     function registerParticipant(uint32 _tournamentId)
         public
+        payable
         validateTournamentId(_tournamentId)
     {
         bool hasRegistered = false;
@@ -142,6 +143,13 @@ contract Brackets is Ownable {
                 keccak256(bytes("created")),
             "The tournament has already started."
         );
+
+        if (tournaments[_tournamentId].registrationFee != 0) {
+            require(
+                msg.value == tournaments[_tournamentId].registrationFee,
+                "The account didn't pay the right fee for the tournament."
+            );
+        }
 
         // Add the account to the tournament brackets.
         for (
