@@ -1,7 +1,7 @@
 import { readable, get } from "svelte/store";
 import { ethers } from "ethers";
 import { push } from "svelte-spa-router";
-import { encrypt, decrypt } from "../utils";
+import { encrypt } from "../utils";
 import connection from "./connection";
 import tournament from "./tournament";
 import tournaments from "./tournaments";
@@ -9,7 +9,7 @@ import newTournament from "./new-tournament";
 import Brackets from "../../artifacts/contracts/Brackets.sol/Brackets.json";
 
 const createContract = () => {
-  const address = readable("0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f");
+  const address = readable("0x5FbDB2315678afecb367f032d93F642f64180aa3");
 
   async function getBalance() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);

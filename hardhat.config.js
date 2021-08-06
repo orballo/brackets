@@ -18,6 +18,7 @@ module.exports = {
   networks: {
     hardhat: {
       chainId: 1337,
+      loggingEnabled: true,
     },
   },
   watcher: {
