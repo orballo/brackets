@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { connection } from "../stores";
+  import { connection, contract } from "../stores";
   import Router from "svelte-spa-router";
   import Home from "./home.svelte";
   import Dashboard from "./dashboard.svelte";
@@ -14,6 +14,7 @@
   };
 
   connection.detectProvider();
+  $: $connection.isConnected && contract.getBalance();
 </script>
 
 <Router {routes} />

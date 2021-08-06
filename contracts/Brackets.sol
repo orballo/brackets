@@ -259,6 +259,14 @@ contract Brackets is Ownable {
 
             accountToTournaments[msg.sender].pop();
         }
+
+        // Return the payed fee for the tournament to the account.
+        if (tournaments[_tournamentId].registrationFee != 0) {
+            (bool success, ) = msg.sender.call{
+                value: tournaments[_tournamentId].registrationFee
+            }("");
+            require(success, "Failed to send Ether");
+        }
     }
 
     /**

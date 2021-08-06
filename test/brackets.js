@@ -16,11 +16,6 @@ describe("Brackets", async () => {
     await brackets.deployed();
   });
 
-  afterEach(async () => {
-    Brackets = null;
-    brackets = null;
-  });
-
   describe("createTournament", () => {
     it("Should create tournaments with secuential ids.", async () => {
       const [owner] = await ethers.getSigners();
@@ -318,6 +313,44 @@ describe("Brackets", async () => {
       expect(tournament.participants[1]).to.be.equal(two.address);
       expect(tournament.participants[2]).to.be.equal(zeroAddress);
       expect(tournament.participants[3]).to.be.equal(zeroAddress);
+    });
+
+    it("Should return the fee of the tournament to the account", async () => {
+      const [owner] = await ethers.getSigners();
+
+      brackets.createTournament({
+        numberOfPlayers: 4,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
+      });
+
+      const balanceBeforeRegister = Math.floor(
+        ethers.utils.formatEther(
+          await ethers.provider.getBalance(owner.address)
+        )
+      );
+
+      await brackets
+        .connect(owner)
+        .registerParticipant(0, { value: ethers.utils.parseEther("1") });
+
+      const balanceAfterRegister = Math.floor(
+        ethers.utils.formatEther(
+          await ethers.provider.getBalance(owner.address)
+        )
+      );
+
+      expect(balanceAfterRegister).to.be.equal(balanceBeforeRegister - 1);
+
+      await brackets.connect(owner).unregisterParticipant(0);
+
+      const balanceAfterUnregister = Math.floor(
+        ethers.utils.formatEther(
+          await ethers.provider.getBalance(owner.address)
+        )
+      );
+
+      expect(balanceAfterUnregister).to.be.equal(balanceBeforeRegister);
     });
 
     it("Should fail if the tournament id is invalid.", async () => {

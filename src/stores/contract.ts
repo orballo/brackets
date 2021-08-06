@@ -9,7 +9,16 @@ import newTournament from "./new-tournament";
 import Brackets from "../../artifacts/contracts/Brackets.sol/Brackets.json";
 
 const createContract = () => {
-  const address = readable("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
+  const address = readable("0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f");
+
+  async function getBalance() {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = ethers.utils.formatEther(
+      await provider.getBalance(get(address))
+    );
+    console.log("balance:", balance);
+    return balance;
+  }
 
   async function getTournaments() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -36,6 +45,14 @@ const createContract = () => {
 
     try {
       const payload = get(newTournament);
+
+      payload.initialPrize = ethers.utils.parseEther(
+        payload.initialPrize.toString()
+      ) as any;
+      payload.registrationFee = ethers.utils.parseEther(
+        payload.registrationFee.toString()
+      ) as any;
+
       const transaction = await contract.createTournament(payload);
       await provider.waitForTransaction(transaction.hash);
       push("/dashboard");
@@ -50,7 +67,13 @@ const createContract = () => {
     const contract = new ethers.Contract(get(address), Brackets.abi, signer);
 
     try {
-      const transaction = await contract.registerParticipant(id);
+      const fee =
+        get(tournament)?.id === id
+          ? get(tournament).registrationFee
+          : get(tournaments).find((t) => t.id === id).registrationFee;
+      const transaction = await contract.registerParticipant(id, {
+        value: ethers.utils.parseEther(fee.toString()),
+      });
       await provider.waitForTransaction(transaction.hash);
       await getTournaments();
       await getTournament(id);
@@ -79,8 +102,10 @@ const createContract = () => {
       id: data.id,
       code: encrypt(data.id.toString()),
       numberOfPlayers: data.numberOfPlayers,
-      initialPrize: data.initialPrize,
-      registrationFee: data.registrationFee,
+      initialPrize: parseFloat(ethers.utils.formatEther(data.initialPrize)),
+      registrationFee: parseFloat(
+        ethers.utils.formatEther(data.registrationFee)
+      ),
       status: data.status,
       admin: data.admin,
       participants: data.participants.filter(
@@ -97,6 +122,7 @@ const createContract = () => {
 
   return {
     subscribe: address.subscribe,
+    getBalance,
     getTournaments,
     getTournament,
     createTournament,
