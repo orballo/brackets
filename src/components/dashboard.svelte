@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { connection, contract, tournaments } from "../stores";
+  import { connection, contract, tournament, tournaments } from "../stores";
   import Header from "./header.svelte";
   import UserIcon from "./user-icon.svelte";
   import ButtonShare from "./button-share.svelte";
@@ -52,26 +52,32 @@
             </div>
           </section>
         </article>
-        <footer>
-          <div />
-          {#if !tournament.isParticipant}
-            <button
-              on:click={() => contract.registerParticipant(tournament.id)}
-            >
-              Register as participant
-            </button>
-          {:else}
-            <button
-              on:click={() => contract.unregisterParticipant(tournament.id)}
-              >Unregister as participant</button
-            >
-          {/if}
-          {#if tournament.isAdmin}
-            <!-- <button>Edit tournament</button> -->
-            <button>Cancel tournament</button>
-            <button>Start tournament</button>
-          {/if}
-        </footer>
+        {#if tournament.status != "canceled"}
+          <footer>
+            <div />
+            {#if !tournament.isParticipant}
+              <button
+                on:click={() => contract.registerParticipant(tournament.id)}
+              >
+                Register as participant
+              </button>
+            {:else}
+              <button
+                on:click={() => contract.unregisterParticipant(tournament.id)}
+                >Unregister as participant</button
+              >
+            {/if}
+            {#if tournament.isAdmin}
+              <!-- <button>Edit tournament</button> -->
+              <button on:click={() => contract.cancelTournament(tournament.id)}
+                >Cancel tournament</button
+              >
+              <button>Start tournament</button>
+            {/if}
+          </footer>
+        {:else}
+          <div class="canceled">Tournament canceled</div>
+        {/if}
       </li>
     {/each}
   </ul>
@@ -175,5 +181,14 @@
 
   button:hover {
     box-shadow: 0 0 2px 0px #333;
+  }
+
+  .canceled {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 24px;
   }
 </style>

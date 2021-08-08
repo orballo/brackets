@@ -9,7 +9,7 @@ import newTournament from "./new-tournament";
 import Brackets from "../../artifacts/contracts/Brackets.sol/Brackets.json";
 
 const createContract = () => {
-  const address = readable("0x5FbDB2315678afecb367f032d93F642f64180aa3");
+  const address = readable("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
 
   async function getBalance() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -52,10 +52,27 @@ const createContract = () => {
       payload.registrationFee = ethers.utils.parseEther(
         payload.registrationFee.toString()
       ) as any;
-
-      const transaction = await contract.createTournament(payload);
+      console.log("payload.initialPrize:", payload.initialPrize);
+      const transaction = await contract.createTournament(payload, {
+        value: payload.initialPrize,
+      });
       await provider.waitForTransaction(transaction.hash);
       push("/dashboard");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function cancelTournament(id: number) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(get(address), Brackets.abi, signer);
+
+    try {
+      const transaction = await contract.cancelTournament(id);
+      await provider.waitForTransaction(transaction.hash);
+      await getTournaments();
+      await getTournament(id);
     } catch (error) {
       console.error(error);
     }
@@ -126,6 +143,7 @@ const createContract = () => {
     getTournaments,
     getTournament,
     createTournament,
+    cancelTournament,
     registerParticipant,
     unregisterParticipant,
   };
