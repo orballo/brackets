@@ -16,6 +16,12 @@ describe("Brackets", async () => {
     await brackets.deployed();
   });
 
+  async function getBalance(address) {
+    return Math.floor(
+      ethers.utils.formatEther(await ethers.provider.getBalance(address))
+    );
+  }
+
   describe("createTournament", () => {
     it("Should create tournaments with secuential ids.", async () => {
       const [owner] = await ethers.getSigners();
@@ -171,6 +177,55 @@ describe("Brackets", async () => {
     it("Should update the tournament with the new options.");
     it("Should fail if any value of the options is not valid.");
     it("Should fail if the user is not the admin of the tournament.");
+  });
+
+  describe.only("cancelTournament", () => {
+    it("Should cancel the tournament.", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("1"),
+      });
+
+      let tournament = await brackets.getTournament(0);
+
+      expect(tournament.status).to.equal("created");
+
+      await brackets.cancelTournament(0);
+
+      tournament = await brackets.getTournament(0);
+
+      expect(tournament.status).to.equal("canceled");
+    });
+    it("Should return the money of the initial prize to the admin.", async () => {
+      const [owner] = await ethers.getSigners();
+
+      const balanceBeforeCreate = await getBalance(owner.address);
+
+      await brackets.createTournament(
+        {
+          numberOfPlayers: 2,
+          initialPrize: ethers.utils.parseEther("50"),
+          registrationFee: 0,
+        },
+        { value: ethers.utils.parseEther("50") }
+      );
+
+      const balanceAfterCreate = await getBalance(owner.address);
+
+      expect(balanceAfterCreate).to.equal(balanceBeforeCreate - 50);
+
+      await brackets.cancelTournament(0);
+
+      const balanceAfterCancel = await getBalance(owner.address);
+
+      expect(balanceAfterCancel).to.equal(balanceBeforeCreate);
+    });
+    it("Should return the money of the registration fee to participants.");
+    it("Should fail if the user is not the admin of the tournament.");
+    it("Should fail if the tournament does not exist.");
+    it("Should fail if the tournament was already canceled.");
+    it("Should fail if the tournament was already finished.");
   });
 
   describe("registerParticipant", () => {

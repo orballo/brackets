@@ -86,6 +86,24 @@ contract Brackets is Ownable {
         _;
     }
 
+    modifier notCanceled(uint32 _id) {
+        require(
+            keccak256(bytes(tournaments[_id].status)) !=
+                keccak256(bytes("canceled")),
+            "The tournament was already canceled."
+        );
+        _;
+    }
+
+    modifier notFinished(uint32 _id) {
+        require(
+            keccak256(bytes(tournaments[_id].status)) !=
+                keccak256(bytes("finished")),
+            "The tournament has already finished."
+        );
+        _;
+    }
+
     /**
      * Create a new tournament.
      */
@@ -132,6 +150,26 @@ contract Brackets is Ownable {
         tournaments[_tournamentId].numberOfPlayers = _options.numberOfPlayers;
         tournaments[_tournamentId].initialPrize = _options.initialPrize;
         tournaments[_tournamentId].registrationFee = _options.registrationFee;
+    }
+
+    /**
+     * Cancel a tournament.
+     */
+    function cancelTournament(uint32 _tournamentId)
+        public
+        onlyAdmin(_tournamentId)
+        validateTournamentId(_tournamentId)
+        notCanceled(_tournamentId)
+        notFinished(_tournamentId)
+    {
+        tournaments[_tournamentId].status = "canceled";
+
+        if (tournaments[_tournamentId].initialPrize != 0) {
+            (bool success, ) = tournamentToBrackets[_tournamentId][0]
+                .participant
+                .call{value: tournaments[_tournamentId].initialPrize}("");
+            require(success, "Failed to send Ether");
+        }
     }
 
     /**
