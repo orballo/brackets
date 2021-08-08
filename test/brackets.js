@@ -17,7 +17,7 @@ describe("Brackets", async () => {
   });
 
   async function getBalance(address) {
-    return Math.floor(
+    return Math.round(
       ethers.utils.formatEther(await ethers.provider.getBalance(address))
     );
   }
@@ -221,7 +221,39 @@ describe("Brackets", async () => {
 
       expect(balanceAfterCancel).to.equal(balanceBeforeCreate);
     });
-    it("Should return the money of the registration fee to participants.");
+    it("Should return the money of the registration fee to participants.", async () => {
+      const [owner, one, two] = await ethers.getSigners();
+
+      await brackets.createTournament({
+        numberOfPlayers: 4,
+        initialPrize: 0,
+        registrationFee: ethers.utils.parseEther("50"),
+      });
+
+      const balanceBeforeRegisterOne = await getBalance(one.address);
+      const balanceBeforeRegisterTwo = await getBalance(two.address);
+
+      await brackets
+        .connect(one)
+        .registerParticipant(0, { value: ethers.utils.parseEther("50") });
+      await brackets
+        .connect(two)
+        .registerParticipant(0, { value: ethers.utils.parseEther("50") });
+
+      const balanceAfterRegisterOne = await getBalance(one.address);
+      const balanceAfterRegisterTwo = await getBalance(two.address);
+
+      expect(balanceBeforeRegisterOne).to.equal(balanceAfterRegisterOne + 50);
+      expect(balanceBeforeRegisterTwo).to.equal(balanceAfterRegisterTwo + 50);
+
+      await brackets.connect(owner).cancelTournament(0);
+
+      const balanceAfterCancelOne = await getBalance(one.address);
+      const balanceAfterCancelTwo = await getBalance(two.address);
+
+      expect(balanceAfterCancelOne).to.equal(balanceBeforeRegisterOne);
+      expect(balanceAfterCancelTwo).to.equal(balanceBeforeRegisterTwo);
+    });
     it("Should fail if the user is not the admin of the tournament.");
     it("Should fail if the tournament does not exist.");
     it("Should fail if the tournament was already canceled.");

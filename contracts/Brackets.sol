@@ -168,7 +168,30 @@ contract Brackets is Ownable {
             (bool success, ) = tournamentToBrackets[_tournamentId][0]
                 .participant
                 .call{value: tournaments[_tournamentId].initialPrize}("");
-            require(success, "Failed to send Ether");
+            require(success, "Failed to return initial prize to admin.");
+        }
+
+        if (tournaments[_tournamentId].registrationFee != 0) {
+            for (
+                uint8 i = 1;
+                i <= tournaments[_tournamentId].numberOfPlayers;
+                i++
+            ) {
+                if (
+                    tournamentToBrackets[_tournamentId][i].participant !=
+                    address(0)
+                ) {
+                    (bool success, ) = tournamentToBrackets[_tournamentId][i]
+                        .participant
+                        .call{
+                        value: tournaments[_tournamentId].registrationFee
+                    }("");
+                    require(
+                        success,
+                        "Failed to return registration fee to participant."
+                    );
+                }
+            }
         }
     }
 
