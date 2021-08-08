@@ -22,17 +22,17 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 
@@ -49,27 +49,27 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       await brackets.createTournament({
         numberOfPlayers: 4,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       await brackets.createTournament({
         numberOfPlayers: 8,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       await brackets.createTournament({
         numberOfPlayers: 16,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       await brackets.createTournament({
         numberOfPlayers: 32,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 
@@ -83,18 +83,70 @@ describe("Brackets", async () => {
       expect(tournaments[4].numberOfPlayers).to.equal(2);
     });
 
+    it("Should take the initial prize from the account", async () => {
+      const [owner] = await ethers.getSigners();
+
+      const balanceBeforeCreate = Math.floor(
+        parseInt(
+          ethers.utils.formatEther(
+            await ethers.provider.getBalance(owner.address)
+          )
+        )
+      );
+
+      await brackets.createTournament(
+        {
+          numberOfPlayers: 2,
+          initialPrize: ethers.utils.parseEther("50"),
+          registrationFee: 0,
+        },
+        { value: ethers.utils.parseEther("50") }
+      );
+
+      const balanceAfterCreate = Math.floor(
+        parseInt(
+          ethers.utils.formatEther(
+            await ethers.provider.getBalance(owner.address)
+          )
+        )
+      );
+
+      expect(balanceAfterCreate).to.equal(balanceBeforeCreate - 50);
+    });
+
+    it("Should fail if the initial prize is not paid.", async () => {
+      let error;
+      try {
+        await brackets.createTournament({
+          numberOfPlayers: 2,
+          initialPrize: ethers.utils.parseEther("1"),
+          registrationFee: 0,
+        });
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include(
+        "The account didn't pay the right initial prize for the tournament."
+      );
+    });
+
     it("Should fail if the `numberOfPlayers` is not a valid value.", async () => {
+      let error;
+
       try {
         await brackets.createTournament({
           numberOfPlayers: 3,
-          initialPrize: 1,
+          initialPrize: 0,
           registrationFee: 1,
         });
-      } catch (error) {
-        expect(error.message).to.include(
-          "Invalid value for `numberOfPlayers`."
-        );
+      } catch (e) {
+        error = e;
       }
+
+      expect(error).not.to.be.undefined;
+      expect(error.message).to.include("Invalid value for `numberOfPlayers`.");
     });
 
     it("Should create tournaments with status `created`.", async () => {
@@ -102,7 +154,7 @@ describe("Brackets", async () => {
 
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 
@@ -116,31 +168,7 @@ describe("Brackets", async () => {
   });
 
   describe("updateTournament", () => {
-    it("Should update the tournament with the new options.", async () => {
-      await brackets.createTournament({
-        numberOfPlayers: 2,
-        initialPrize: 1,
-        registrationFee: 1,
-      });
-
-      let tournament = await brackets.getTournament(0);
-
-      expect(tournament.numberOfPlayers).to.equal(2);
-      expect(tournament.initialPrize).to.equal(1);
-      expect(tournament.registrationFee).to.equal(1);
-
-      await brackets.updateTournament(0, {
-        numberOfPlayers: 4,
-        initialPrize: 2,
-        registrationFee: 2,
-      });
-
-      tournament = await brackets.getTournament(0);
-
-      expect(tournament.numberOfPlayers).to.equal(4);
-      expect(tournament.initialPrize).to.equal(2);
-      expect(tournament.registrationFee).to.equal(2);
-    });
+    it("Should update the tournament with the new options.");
     it("Should fail if any value of the options is not valid.");
     it("Should fail if the user is not the admin of the tournament.");
   });
@@ -192,7 +220,7 @@ describe("Brackets", async () => {
     it("Should fail if the account is already registered for the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 0,
       });
 
@@ -356,7 +384,7 @@ describe("Brackets", async () => {
     it("Should fail if the tournament id is invalid.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 4,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 
@@ -375,7 +403,7 @@ describe("Brackets", async () => {
     it("Should fail if the account is not registered for the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 4,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 
@@ -427,7 +455,7 @@ describe("Brackets", async () => {
     it("Should fail if the tournament id is invalid.", async () => {
       brackets.createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 
@@ -493,17 +521,17 @@ describe("Brackets", async () => {
 
       brackets.connect(owner).createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       brackets.connect(addressOne).createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
       brackets.connect(addressTwo).createTournament({
         numberOfPlayers: 2,
-        initialPrize: 1,
+        initialPrize: 0,
         registrationFee: 1,
       });
 

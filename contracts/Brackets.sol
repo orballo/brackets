@@ -91,8 +91,16 @@ contract Brackets is Ownable {
      */
     function createTournament(TournamentOptions memory _options)
         public
+        payable
         validateOptions(_options)
     {
+        if (_options.initialPrize != 0) {
+            require(
+                msg.value == _options.initialPrize,
+                "The account didn't pay the right initial prize for the tournament."
+            );
+        }
+
         // Populate the tournament.
         Tournament memory _tournament;
         _tournament.id = tournamentId;
