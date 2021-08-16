@@ -2,6 +2,8 @@
   import { connection, tournament, contract } from "../stores";
   import { decrypt } from "../utils";
   import Header from "./header.svelte";
+  import UserIcon from "./user-icon.svelte";
+  import Address from "./address.svelte";
 
   export let params: Record<string, any> = {};
 
@@ -11,7 +13,7 @@
     rounds = [];
 
     for (let i = $tournament.numberOfPlayers; i >= 1; i = i / 2) {
-      rounds = [...rounds, Array.from({ length: i }, (_, index) => index + 1)];
+      rounds = [...rounds, Array.from({ length: i }, (_, index) => index)];
     }
   }
 
@@ -26,7 +28,13 @@
       {#each rounds as round}
         <div class="round">
           {#each round as bracket}
-            <div class="bracket">{bracket}</div>
+            <div class="bracket">
+              {#if $tournament.participants[bracket]}
+                <UserIcon address={$tournament.participants[bracket]} /><Address
+                  address={$tournament.participants[bracket]}
+                />
+              {/if}
+            </div>
           {/each}
         </div>
       {/each}
@@ -50,7 +58,9 @@
 
   .wrapper {
     display: flex;
-    min-height: min-content;
+    justify-content: center;
+    min-height: 100%;
+    min-width: 100%;
     position: absolute;
     top: 0;
     left: 0;
@@ -58,21 +68,24 @@
   }
 
   .round {
-    margin: 0 120px;
+    margin: 0 80px;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    /* align-items: space-between; */
   }
 
   .bracket {
-    height: 32px;
-    width: 96px;
+    min-height: 60px;
+    min-width: 100px;
+    padding: 0 12px;
     background: #ccc;
-
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .bracket > :global(span) {
+    margin-left: 8px;
   }
 
   .bracket:nth-of-type(odd) {
