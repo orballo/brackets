@@ -179,7 +179,7 @@ describe("Brackets", async () => {
     it("Should fail if the user is not the admin of the tournament.");
   });
 
-  describe.only("cancelTournament", () => {
+  describe("cancelTournament", () => {
     it("Should cancel the tournament.", async () => {
       await brackets.createTournament({
         numberOfPlayers: 2,
@@ -516,7 +516,7 @@ describe("Brackets", async () => {
       const [owner, one, two] = await ethers.getSigners();
 
       await brackets.createTournament({
-        numberOfPlayers: 2,
+        numberOfPlayers: 32,
         initialPrize: 0,
         registrationFee: ethers.utils.parseEther("1"),
       });
@@ -531,12 +531,17 @@ describe("Brackets", async () => {
       let tournament = await brackets.getTournament(0);
 
       expect(tournament.id).to.equal(0);
-      expect(tournament.numberOfPlayers).to.equal(2);
+      expect(tournament.numberOfPlayers).to.equal(32);
       expect(tournament.status).to.equal("created");
       expect(tournament.admin).to.equal(owner.address);
-      expect(tournament.participants.length).to.equal(2);
+      expect(tournament.participants.length).to.equal(32);
       expect(tournament.participants[0]).to.equal(one.address);
       expect(tournament.participants[1]).to.equal(two.address);
+      expect(tournament.brackets.length).to.equal(63);
+      expect(tournament.brackets[0].participant).to.equal(one.address);
+      expect(tournament.brackets[0].result).to.equal("none");
+      expect(tournament.brackets[1].participant).to.equal(two.address);
+      expect(tournament.brackets[1].result).to.equal("none");
     });
 
     it("Should fail if the tournament id is invalid.", async () => {

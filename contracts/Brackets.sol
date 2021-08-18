@@ -20,6 +20,7 @@ struct TournamentPayload {
     string status;
     address admin;
     address[] participants;
+    Bracket[] brackets;
 }
 
 struct TournamentOptions {
@@ -238,6 +239,7 @@ contract Brackets is Ownable {
                 tournamentToBrackets[_tournamentId][i].participant == address(0)
             ) {
                 tournamentToBrackets[_tournamentId][i].participant = msg.sender;
+                tournamentToBrackets[_tournamentId][i].result = "none";
                 hasRegistered = true;
                 break;
             }
@@ -365,6 +367,15 @@ contract Brackets is Ownable {
                 _tournament.participants[i - 1] = tournamentToBrackets[_id][i]
                     .participant;
             }
+        }
+
+        uint8 bracketsLength = (_tournament.numberOfPlayers * 2 - 1);
+
+        _tournament.brackets = new Bracket[](bracketsLength);
+
+        // Populate the brackets of the tournament.
+        for (uint8 i = 1; i <= _tournament.brackets.length; i++) {
+            _tournament.brackets[i - 1] = tournamentToBrackets[_id][i];
         }
 
         return _tournament;
