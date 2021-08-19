@@ -12,7 +12,7 @@
 <div class="container">
   <header>
     <span>ID</span>
-    {tournament.id}
+    <a href={`#/t/${tournament.code}`}>{tournament.id}</a>
     <ButtonShare code={tournament.code} />
   </header>
   <article>

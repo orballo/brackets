@@ -8,8 +8,10 @@ import tournaments from "./tournaments";
 import newTournament from "./new-tournament";
 import Brackets from "../../artifacts/contracts/Brackets.sol/Brackets.json";
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 const createContract = () => {
-  const address = readable("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
+  const address = readable("0x9A676e781A523b5d0C0e43731313A708CB607508");
 
   async function getBalance() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -126,13 +128,17 @@ const createContract = () => {
       status: data.status,
       admin: data.admin,
       participants: data.participants.filter(
-        (participant: string) =>
-          participant !== "0x0000000000000000000000000000000000000000"
+        (participant: string) => participant !== ZERO_ADDRESS
       ),
       isAdmin:
         data.admin.toUpperCase() === get(connection).address.toUpperCase(),
       isParticipant: !!data.participants.find(
         (p: string) => p.toUpperCase() === get(connection).address.toUpperCase()
+      ),
+      brackets: data.brackets.map((bracket: any) =>
+        bracket.participant !== ZERO_ADDRESS
+          ? { participant: bracket.participant, result: bracket.result }
+          : { participant: undefined, result: "none" }
       ),
     };
   }

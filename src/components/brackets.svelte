@@ -12,8 +12,12 @@
   $: if ($tournament) {
     rounds = [];
 
-    for (let i = $tournament.numberOfPlayers; i >= 1; i = i / 2) {
-      rounds = [...rounds, Array.from({ length: i }, (_, index) => index)];
+    for (
+      let i = $tournament.numberOfPlayers, j = 0;
+      i >= 1;
+      j += i, i = i / 2
+    ) {
+      rounds = [...rounds, Array.from({ length: i }, (_, index) => index + j)];
     }
   }
 
@@ -30,8 +34,10 @@
           {#each round as bracket}
             <div class="bracket">
               {#if $tournament.participants[bracket]}
-                <UserIcon address={$tournament.participants[bracket]} /><Address
-                  address={$tournament.participants[bracket]}
+                <UserIcon
+                  address={$tournament.brackets[bracket].participant}
+                /><Address
+                  address={$tournament.brackets[bracket].participant}
                 />
               {/if}
             </div>

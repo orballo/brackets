@@ -11,6 +11,7 @@ export interface Tournament {
   participants: string[];
   isAdmin: boolean;
   isParticipant: boolean;
+  brackets: { participant: string; result: string }[];
 }
 
 export default writable(null as Tournament);
