@@ -87,6 +87,15 @@ contract Brackets is Ownable {
         _;
     }
 
+    modifier notStarted(uint32 _id) {
+        require(
+            keccak256(bytes(tournaments[_id].status)) !=
+                keccak256(bytes("started")),
+            "The tournament has already started."
+        );
+        _;
+    }
+
     modifier notCanceled(uint32 _id) {
         require(
             keccak256(bytes(tournaments[_id].status)) !=
@@ -140,17 +149,18 @@ contract Brackets is Ownable {
         tournamentId += 1;
     }
 
-    // /**
-    //  * Update a tournament.
-    //  */
-    function updateTournament(
-        uint32 _tournamentId,
-        TournamentOptions memory _options
-    ) public onlyAdmin(_tournamentId) validateOptions(_options) {
-        // Update the tournament.
-        tournaments[_tournamentId].numberOfPlayers = _options.numberOfPlayers;
-        tournaments[_tournamentId].initialPrize = _options.initialPrize;
-        tournaments[_tournamentId].registrationFee = _options.registrationFee;
+    /**
+     * Start a tournament.
+     */
+    function startTournament(uint32 _tournamentId)
+        public
+        onlyAdmin(_tournamentId)
+        validateTournamentId(_tournamentId)
+        notStarted(_tournamentId)
+        notCanceled(_tournamentId)
+        notFinished(_tournamentId)
+    {
+        tournaments[_tournamentId].status = "started";
     }
 
     /**

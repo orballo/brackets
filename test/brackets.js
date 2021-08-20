@@ -173,10 +173,34 @@ describe("Brackets", async () => {
     it("Should fail if `initialPrize` and `registrationFee` are both 0.");
   });
 
-  describe("updateTournament", () => {
-    it("Should update the tournament with the new options.");
-    it("Should fail if any value of the options is not valid.");
+  describe.only("startTournament", () => {
+    it("Should start the tournament.", async () => {
+      await brackets.createTournament({
+        numberOfPlayers: 2,
+        initialPrize: 0,
+        registrationFee: 1,
+      });
+
+      let tournament = await brackets.getTournament(0);
+
+      expect(tournament.status).to.equal("created");
+
+      await brackets.startTournament(0);
+
+      tournament = await brackets.getTournament(0);
+
+      expect(tournament.status).to.equal("started");
+    });
+
     it("Should fail if the user is not the admin of the tournament.");
+
+    it("Should fail if the tournament does not exist.");
+
+    it("Should fail if the tournament has already started.");
+
+    it("Should fail if the tournament was already canceled.");
+
+    it("Should fail if the tournament has already finished.");
   });
 
   describe("cancelTournament", () => {
