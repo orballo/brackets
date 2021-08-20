@@ -54,21 +54,28 @@
       <button on:click={() => push("/b/" + tournament.code)}>
         See brackets
       </button>
-      {#if !tournament.isParticipant}
-        <button on:click={() => contract.registerParticipant(tournament.id)}>
-          Register as participant
-        </button>
-      {:else}
-        <button on:click={() => contract.unregisterParticipant(tournament.id)}>
-          Unregister as participant
-        </button>
+      {#if tournament.status === "created"}
+        {#if !tournament.isParticipant}
+          <button on:click={() => contract.registerParticipant(tournament.id)}>
+            Register as participant
+          </button>
+        {:else}
+          <button
+            on:click={() => contract.unregisterParticipant(tournament.id)}
+          >
+            Unregister as participant
+          </button>
+        {/if}
       {/if}
       {#if tournament.isAdmin}
-        <!-- <button>Edit tournament</button> -->
-        <button on:click={() => contract.cancelTournament(tournament.id)}
-          >Cancel tournament</button
-        >
-        <button>Start tournament</button>
+        <button on:click={() => contract.cancelTournament(tournament.id)}>
+          Cancel tournament
+        </button>
+        {#if tournament.status === "created"}
+          <button on:click={() => contract.startTournament(tournament.id)}>
+            Start tournament
+          </button>
+        {/if}
       {/if}
     </footer>
   {:else}

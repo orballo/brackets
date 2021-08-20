@@ -65,6 +65,21 @@ const createContract = () => {
     }
   }
 
+  async function startTournament(id: number) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(get(address), Brackets.abi, signer);
+
+    try {
+      const transaction = await contract.startTournament(id);
+      await provider.waitForTransaction(transaction.hash);
+      await getTournaments();
+      await getTournament(id);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async function cancelTournament(id: number) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
@@ -149,6 +164,7 @@ const createContract = () => {
     getTournaments,
     getTournament,
     createTournament,
+    startTournament,
     cancelTournament,
     registerParticipant,
     unregisterParticipant,
